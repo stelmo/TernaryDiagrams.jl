@@ -1,0 +1,13 @@
+name = "TernaryDiagrams"
+uuid = "54198458-1476-45ac-9e44-88a4201bfea6"
+authors = ["St. Elmo Wilken <stelmozors@gmail.com> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
