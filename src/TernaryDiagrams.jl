@@ -130,7 +130,7 @@ function draw_grid!(tr::Ternary)
         text!(
             tr,
             x1,
-            text = string(round(f1, digits=2)),
+            text = "  "*string(round(f1, digits=2)),
             fontsize = fontsize,
             rotation = -π/3,
             align = (:left, :center),
@@ -152,7 +152,7 @@ function draw_grid!(tr::Ternary)
         text!(
             tr,
             x1,
-            text = string(round(f2, digits=2)),
+            text = "  "*string(round(f2, digits=2)),
             fontsize = fontsize,
             rotation = π/3,
             align = (:left, :center),
@@ -174,7 +174,7 @@ function draw_grid!(tr::Ternary)
         text!(
             tr,
             x1,
-            text = string(round(f1, digits=2)),
+            text = string(round(f1, digits=2))*"  ",
             fontsize = fontsize,
             align = (:right, :center),
         )
@@ -191,24 +191,23 @@ function Makie.plot!(tr::Ternary)
 
     # create observables
     dpoints = Observable(Point2f[])
-    # colors = Observable(Any[])
+    colors = Observable(Any[])
 
     function update_plot(xs, ys, zs)
-
         empty!(dpoints[])
-
         for (x, y, z) in zip(xs, ys, zs)
             carts = R * [x,y,z]
             push!(dpoints[], Point2f(carts[2], carts[3]))
         end
-
     end
 
-    Makie.Observables.onany(update_plot, tr[:x][], tr[:y][], tr[:z][])
+    Makie.Observables.onany(update_plot, tr[:x], tr[:y], tr[:z])
+    
+    colors = tr.color isa Symbol ? fill(tr.color, length(tr[:z][])) : tr.color[] 
     update_plot(tr[:x][], tr[:y][], tr[:z][])
     
     # plot data points
-    scatter!(tr, dpoints, color=:red)
+    scatter!(tr, dpoints, color=colors)
 
     tr
 end
