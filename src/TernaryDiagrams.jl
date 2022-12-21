@@ -397,7 +397,7 @@ function Makie.plot!(tr::TernaryFill)
         min_idxs = [last(x) for x in arr]
         min_idxs[argmin(min_vs)]
     end
-    closest_value(pnts) = dvalues[][closet_idx(pnts)]
+    closest_value(pnts) = dvalues[][closest_idx(pnts)]
      
     # first triangle
     for n in 0:N        
@@ -429,7 +429,7 @@ function Makie.plot!(tr::TernaryFill)
                 right2 = Point2(r2px, r2py)
                 right = Point2(rpx, rpy)
 
-                col = cmap(closest_value(top))
+                col = cmap(closest_value([top, top2, right, right2]))
                 poly!(tr, 
                     [top, top2, right2, right, top];
                     color = col,
@@ -439,7 +439,7 @@ function Makie.plot!(tr::TernaryFill)
                 )
                 break
             else
-                col = cmap(closest_value(top))
+                col = cmap(closest_value([top, left, right, top]))
                 poly!(tr, 
                     [top, left, right, top];
                     color = col,
