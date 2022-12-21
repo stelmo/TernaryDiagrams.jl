@@ -391,9 +391,14 @@ function Makie.plot!(tr::TernaryFill)
     lb = max(_lb, tr.min_val[])
     ub = min(_ub, tr.max_val[])
     cmap(x) = get(tr.color[], x, (lb, ub))
-    closest_value(pnt) = dvalues[][argmin(norm.(dpoints[] .- pnt))]
+    closest_idx(pnts) = begin
+        arr = [findmin(norm.(dpoints[] .- pnt)) for pnt in pnts]
+        min_vs = [first(x) for x in arr]
+        min_idxs = [last(x) for x in arr]
+        min_idxs[argmin(min_vs)]
+    end
+    closest_value(pnts) = dvalues[][closet_idx(pnts)]
      
-
     # first triangle
     for n in 0:N        
         abs(1.0 - N * h) < 1e-6 && break # ignore small details
