@@ -424,15 +424,21 @@ function Makie.plot!(tr::TernaryFill)
                 right2 = Point2(r2px, r2py)
                 right = Point2(rpx, rpy)
 
+                col = cmap(closest_value(top))
                 poly!(tr, 
                     [top, top2, right2, right, top];
                     color = cmap(closest_value(top)),
+                    strokecolor = col,
+                    strokewidth = 0.1,
                 )
                 break
             else
+                col = cmap(closest_value(top))
                 poly!(tr, 
                     [top, left, right, top];
-                    color = cmap(closest_value(top)),
+                    color = col,
+                    strokecolor = col,
+                    strokewidth = 0.1, 
                 )                
             end
             i += 1
