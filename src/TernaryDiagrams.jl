@@ -1,6 +1,7 @@
 module TernaryDiagrams
 
 using Makie, LinearAlgebra, ColorSchemes
+import Base
 
 # default coordinates of triangle
 const r1 = [0, 0]
@@ -11,6 +12,7 @@ const R = [
     r1 r2 r3
 ]
 const invR = inv(R)
+const tol = 1e-5
 
 from_cart_to_bary(x, y) = invR * [1, x, y]
 from_bary_to_cart(a1, a2, a3) = (R * [a1, a2, a3])[2:3]
@@ -291,10 +293,58 @@ function Makie.plot!(tr::TernaryLine)
 end
 
 """
-To a barycentric axis, add filled mini-triangles (mostly) where the color map is based on
+Internal edge used to construct filled triangle. 
+"""
+struct Edge
+    p1::Point2
+    p2::Point2
+end
 
-# Note
-Makie errors when `triangle_length` divides 1.0 evenly. Not sure why...
+point_similar(p1::Point2, p2::Point2) = norm(p1 - p2) <= tol
+
+function Base.:(==)(e1::Edge, e2::Edge) 
+    point_similar(e1.p1, e2.p1) && point_similar(e1.p2, e2.p2) || 
+    point_similar(e1.p1, e2.p2) && point_similar(e1.p2, e2.p1)
+end 
+
+"""
+Struct used to store the overall Polygon of the joined minitriangles.
+"""
+struct Polygon
+    color::Int64
+    edges::Vector{Edge}
+end
+
+function extend_shapes!(pgons::Vector{Polygon}, col, edges)
+    
+    idx = 0
+    for (i, pgon) in enumerate(pgons)
+        if col == pgon.color && any(in.(edges, Ref(pgon.edges))) # color and at least 1 edge in common
+            idx = i 
+            break
+        end
+    end
+
+    if idx == 0 # found no match
+        push!(pgons, Polygon(col, edges))
+    else # found a match
+        # remove these common edges
+        rem_idxs = [i for (i, edge) in enumerate(pgons[idx].edges) if edge in edges]
+        # keep these edges
+        keep_idxs = [i for (i, edge) in enumerate(edges) if edge ∉ pgons[idx].edges]
+        
+        deleteat!(pgons[idx].edges, rem_idxs)        
+        append!(pgons[idx].edges, edges[keep_idxs])
+    end
+end
+
+
+
+"""
+To a barycentric axis, add filled mini-triangles (mostly) where the color map is
+based on the attribute `color`. The number of color groups plotted depends on
+the length of the supplied color map. Expect this function to work better with
+`length(color) < 10`.
 """
 function Makie.plot!(tr::TernaryFill)
 
@@ -390,7 +440,12 @@ function Makie.plot!(tr::TernaryFill)
     _lb, _ub = extrema(dvalues[])
     lb = max(_lb, tr.min_val[])
     ub = min(_ub, tr.max_val[])
-    cmap(x) = get(tr.color[], x, (lb, ub))
+    ncolors = length(tr.color[])
+    d = (ub - lb)/ncolors
+    bins = [(lb + n*d)..(lb + (n+1)*d) for n in 0:(ncolors-1)]
+    
+    cmap(idx) = tr.color[][idx]
+    cmap_idx(x) = findfirst([x in bin for bin in bins])
     closest_idx(pnts) = begin
         arr = [findmin(norm.(dpoints[] .- pnt)) for pnt in pnts]
         min_vs = [first(x) for x in arr]
@@ -398,10 +453,12 @@ function Makie.plot!(tr::TernaryFill)
         min_idxs[argmin(min_vs)]
     end
     closest_value(pnts) = dvalues[][closest_idx(pnts)]
-     
+    
+    pgons = Polygon[] # vector to store polygons
+
     # first triangle
     for n in 0:N        
-        abs(1.0 - N * h) < 1e-6 && break # ignore small details
+        abs(1.0 - n * h) < tol && break # ignore small polygons
         
         top, left, right = first_triangle(n, h, N) # reset
         i = 1
@@ -409,7 +466,7 @@ function Makie.plot!(tr::TernaryFill)
             top, left, right = position_triangle(top, left, right, i, n, h, N)
   
             if any(first(x) > to_far_right(last(x)) for x in [top, left, right])
-                h = n == N ? h = 1 - N * h : h # adjust side if necessary
+                h = n == N ? h = 1 - N * h : h # adjust side if necessary for last row
                 d = sqrt(3) / 2 * h 
 
                 tpx = first(top) - h/2
@@ -429,27 +486,71 @@ function Makie.plot!(tr::TernaryFill)
                 right2 = Point2(r2px, r2py)
                 right = Point2(rpx, rpy)
 
-                col = cmap(closest_value([top, top2, right, right2]))
-                poly!(tr, 
-                    [top, top2, right2, right, top];
-                    color = col,
-                    strokewidth = 0,
-                    strokecolor = :transparent,
-                    shading = false,
-                )
+                col_idx = cmap_idx(closest_value([top, top2, right2, right]))
+                if abs(tpx - t2px) < tol && abs(rpx - r2px) < tol
+                    break # polygon is a line, skip    
+                elseif abs(tpx - t2px) < tol # top and top2 are the same
+                    edges = [Edge(top, right2), Edge(right2, right), Edge(right, top)]
+                elseif abs(rpx - r2px) < tol # right and right2 are the same
+                    edges = [Edge(top, top2), Edge(top2, right), Edge(right, top)]                                    
+                else
+                    edges = [Edge(top, top2), Edge(top2, right2), Edge(right2, right), Edge(right, top)]
+                end
+                
+                extend_shapes!(pgons, col_idx, edges)
+
                 break
             else
-                col = cmap(closest_value([top, left, right, top]))
-                poly!(tr, 
-                    [top, left, right, top];
-                    color = col,
-                    strokewidth = 0,
-                    strokecolor = :transparent,
-                    shading = false,
-                )                
+                col_idx = cmap_idx(closest_value([top, left, right, top]))
+                edges = [Edge(top, left), Edge(left, right), Edge(right, top)]
+                extend_shapes!(pgons, col_idx, edges)
+
             end
             i += 1
         end
+    end
+
+    # need to sweep through pgons again because some shapes are not combined above
+    min_pgons = Polygon[]
+    for pgon in pgons
+        extend_shapes!(min_pgons, pgon.color, pgon.edges)
+    end
+
+    # println(length(min_pgons))
+    # for pgon in min_pgons
+    #     println("color = ", pgon.color)
+    #     for edge in pgon.edges
+    #         println(edge)
+    #     end
+    # end
+
+    for (ii, pgon) in enumerate(min_pgons)
+        # println("doing pgon: ", ii)
+        # build edges by connecting vertices
+        vertices = [pgon.edges[1].p1, pgon.edges[1].p2]
+        edge_idxs = collect(2:length(pgon.edges)) # look from the 2nd edge onwards
+        while !isempty(edge_idxs)
+            v = last(vertices)
+            
+            i = findfirst(x -> point_similar(pgon.edges[x].p1, v) || point_similar(pgon.edges[x].p2, v), edge_idxs)
+            if point_similar(pgon.edges[edge_idxs[i]].p1, v)
+                push!(vertices, pgon.edges[edge_idxs[i]].p2)
+            else
+                push!(vertices, pgon.edges[edge_idxs[i]].p1)
+            end
+        
+            deleteat!(edge_idxs, i)
+        end
+        push!(vertices, pgon.edges[1].p1) # complete shape
+        
+        # draw polygon
+        poly!(tr, 
+            vertices;
+            color = cmap(pgon.color),
+            strokewidth = 0,
+            strokecolor = :transparent,
+            shading = false,
+        ) 
     end
 
     tr
