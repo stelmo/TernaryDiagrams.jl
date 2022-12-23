@@ -23,7 +23,7 @@ ternarycontour!(
     a2,
     a3,
     ws;
-    levels = 8,
+    levels = 20,
     linewidth = 1,
     color = nothing,
     colormap = reverse(ColorSchemes.Spectral),

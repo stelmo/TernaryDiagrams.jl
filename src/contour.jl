@@ -71,44 +71,9 @@ function split_edges(edges::Vector{Vector{gp.Point2D}})
     curves
 end
 
-function Makie.plot!(tr::TernaryContour)
+above_isovalue(x, i, bins) = x >= bins[i]
 
-    # create observables
-    xs = Observable(Float64[])
-    ys = Observable(Float64[])
-    ws = Observable(Float64[])
-
-    function update_plot(_xs, _ys, _zs, _ws)
-        empty!(xs[])
-        empty!(ys[])
-        empty!(ws[])
-        for (x, y, z, w) in zip(_xs, _ys, _zs, _ws)
-            carts = R * [x, y, z]
-            push!(xs[], carts[2])
-            push!(ys[], carts[3])
-            push!(ws[], w)
-        end
-    end
-    Makie.Observables.onany(update_plot, tr[:x], tr[:y], tr[:z], tr[:w])
-    update_plot(tr[:x][], tr[:y][], tr[:z][], tr[:w][])
-
-    # male bins for levels
-    lb = max(minimum(ws[]), tr.clip_min_w[])
-    ub = min(maximum(ws[]), tr.clip_max_w[])
-    d = (ub - lb) / (tr.levels[] + 1)
-    bins = [(lb + n * d) for n = 1:tr.levels[]]
-    above_isovalue(x, i) = x >= bins[i]
-
-    if tr.pad_data[]
-        data_coords = delaunay_scale.(xs[], ys[])
-        pad_coords, pad_weights = generate_padded_data(data_coords, ws[])
-        scaled_coords = [data_coords; pad_coords]
-        weights = [ws[]; pad_weights]
-    else
-        scaled_coords = delaunay_scale.(xs[], ys[])
-        weights = ws[]
-    end
-
+function contour_triangle(scaled_coords, bins, weights, levels)
     tess = vd.DelaunayTessellation()
     vd.sizehint!(tess, length(scaled_coords))
     push!(tess, [x for x in scaled_coords]) # NB: this modifies the second argument in place!
@@ -137,18 +102,18 @@ function Makie.plot!(tr::TernaryContour)
 
     level_edges = Dict{Int64,Vector{Vector{gp.Point2D}}}()
     for triangle in tess
-        for level = 1:tr.levels[]
+        for level = 1:levels
             a = gp.geta(triangle)
             a_idx = argmin(norm(x - a) for x in scaled_coords)
-            a_above = above_isovalue(weights[a_idx], level)
+            a_above = above_isovalue(weights[a_idx], level, bins)
 
             b = gp.getb(triangle)
             b_idx = argmin(norm(x - b) for x in scaled_coords)
-            b_above = above_isovalue(weights[b_idx], level)
+            b_above = above_isovalue(weights[b_idx], level, bins)
 
             c = gp.getc(triangle)
             c_idx = argmin(norm(x - c) for x in scaled_coords)
-            c_above = above_isovalue(weights[c_idx], level)
+            c_above = above_isovalue(weights[c_idx], level, bins)
 
             p_ab = nothing
             if (a_above && !b_above) || (!a_above && b_above)
@@ -175,6 +140,47 @@ function Makie.plot!(tr::TernaryContour)
             end
         end
     end
+    level_edges
+end
+
+function Makie.plot!(tr::TernaryContour)
+
+    # create observables
+    xs = Observable(Float64[])
+    ys = Observable(Float64[])
+    ws = Observable(Float64[])
+
+    function update_plot(_xs, _ys, _zs, _ws)
+        empty!(xs[])
+        empty!(ys[])
+        empty!(ws[])
+        for (x, y, z, w) in zip(_xs, _ys, _zs, _ws)
+            carts = R * [x, y, z]
+            push!(xs[], carts[2])
+            push!(ys[], carts[3])
+            push!(ws[], w)
+        end
+    end
+    Makie.Observables.onany(update_plot, tr[:x], tr[:y], tr[:z], tr[:w])
+    update_plot(tr[:x][], tr[:y][], tr[:z][], tr[:w][])
+
+    # male bins for levels
+    lb = max(minimum(ws[]), tr.clip_min_w[])
+    ub = min(maximum(ws[]), tr.clip_max_w[])
+    d = (ub - lb) / (tr.levels[] + 1)
+    bins = [(lb + n * d) for n = 1:tr.levels[]]
+
+    if tr.pad_data[]
+        data_coords = delaunay_scale.(xs[], ys[])
+        pad_coords, pad_weights = generate_padded_data(data_coords, ws[])
+        scaled_coords = [data_coords; pad_coords]
+        weights = [ws[]; pad_weights]
+    else
+        scaled_coords = delaunay_scale.(xs[], ys[])
+        weights = ws[]
+    end
+
+    level_edges = contour_triangle(scaled_coords, bins, weights, tr.levels[])
 
     for level = 1:tr.levels[]
         for curve in split_edges(level_edges[level])
