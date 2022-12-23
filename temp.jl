@@ -3,91 +3,162 @@ using CairoMakie
 using ColorSchemes
 using TernaryDiagrams
 const td = TernaryDiagrams
-
-n = 50
-arr = rand(n, 3)
-arr ./= sum(arr, dims=2)
-arr
-color = [ColorSchemes.Dark2_8[i] for i in rand(1:8, n)] 
-vs = rand(n)
-
-fig = Figure();
-ax = Axis(fig[1,1]);
-
-ternaryaxis!(ax; labelx = "hello");
-ternaryfill!(ax, arr[:, 1], arr[:, 2], arr[:, 3], vs; triangle_length=0.005, color=reverse(ColorSchemes.Spectral_4))
-
-xlims!(ax, -0.2, 1.2)
-ylims!(ax, -0.3, 1.1)
-hidedecorations!(ax)
-fig
-
-###########################################
+using GeometricalPredicates, VoronoiDelaunay, LinearAlgebra, Interpolations
+const vd = VoronoiDelaunay
+using JLD2
 
 
-pgon = td.Polygon(
-    2,
-    [
-        TernaryDiagrams.Edge([0.5000000000000002, 0.2598076211353315], [0.4650000000000002, 0.1991858428704208])
-        TernaryDiagrams.Edge([0.5350000000000001, 0.1991858428704208], [0.5000000000000002, 0.2598076211353315])
-        TernaryDiagrams.Edge([0.5000000000000001, 0.13856406460551007], [0.4650000000000001, 0.19918584287042074])
-        TernaryDiagrams.Edge([0.5350000000000001, 0.19918584287042074], [0.6050000000000002, 0.19918584287042074])
-        TernaryDiagrams.Edge([0.6050000000000002, 0.19918584287042074], [0.5700000000000002, 0.13856406460551007])
-        TernaryDiagrams.Edge([0.5350000000000003, 0.0779422863405994], [0.5000000000000002, 0.1385640646055101])
-        TernaryDiagrams.Edge([0.5700000000000003, 0.1385640646055101], [0.6400000000000003, 0.1385640646055101])
-        TernaryDiagrams.Edge([0.6400000000000003, 0.1385640646055101], [0.6050000000000003, 0.0779422863405994])
-        TernaryDiagrams.Edge([0.5700000000000002, 0.017320508075688565], [0.6400000000000002, 0.017320508075688565])
-        TernaryDiagrams.Edge([0.6050000000000002, 0.07794228634059927], [0.6750000000000003, 0.07794228634059927])
-        TernaryDiagrams.Edge([0.6400000000000002, 0.017320508075688565], [0.7100000000000003, 0.017320508075688565])
-        TernaryDiagrams.Edge([0.7100000000000003, 0.017320508075688565], [0.7800000000000004, 0.017320508075688565])
-        TernaryDiagrams.Edge([0.7800000000000004, 0.017320508075688565], [0.8500000000000004, 0.017320508075688565])
-        TernaryDiagrams.Edge([0.8500000000000004, 0.017320508075688565], [0.9200000000000005, 0.017320508075688565])
-        TernaryDiagrams.Edge([0.9550000000000002, 0.07794228634059926], [0.9900000000000001, 0.017320508075688565])
-        TernaryDiagrams.Edge([0.9900000000000001, 0.017320508075688565], [0.9200000000000005, 0.017320508075688565])
-        TernaryDiagrams.Edge([0.7100000000000004, 0.2598076211353315], [0.6750000000000004, 0.1991858428704208])
-        TernaryDiagrams.Edge([0.7100000000000004, 0.2598076211353315], [0.7800000000000004, 0.2598076211353315])
-        TernaryDiagrams.Edge([0.7800000000000005, 0.2598076211353315], [0.8500000000000001, 0.2598076211353315])
-        TernaryDiagrams.Edge([0.8500000000000001, 0.2598076211353315], [0.8850000000000001, 0.1991858428704208])
-        TernaryDiagrams.Edge([0.8850000000000001, 0.1991858428704208], [0.9200000000000002, 0.13856406460551002])
-        TernaryDiagrams.Edge([0.92, 0.1385640646055101], [0.9550000000000001, 0.0779422863405994])
-        TernaryDiagrams.Edge([0.6750000000000003, 0.1991858428704208], [0.6400000000000002, 0.13856406460551002])
-        TernaryDiagrams.Edge([0.6750000000000004, 0.0779422863405994], [0.6400000000000003, 0.1385640646055101])
-        TernaryDiagrams.Edge([0.5000000000000001, 0.01732050807568855], [0.4650000000000001, 0.07794228634059927])
-        TernaryDiagrams.Edge([0.4650000000000001, 0.07794228634059927], [0.5350000000000001, 0.07794228634059927])
-        TernaryDiagrams.Edge([0.5000000000000001, 0.017320508075688565], [0.5700000000000002, 0.017320508075688565])
-    ]
-)
+a1 = load("data.jld2", "a1")
+a2 = load("data.jld2", "a2")
+a3 = load("data.jld2", "a3")
+vs = Float64.(load("data.jld2", "mus"))
 
+xs, ys = td.from_bary_to_cart(a1, a2, a3)
+
+# colormap
+colscheme = reverse(ColorSchemes.Spectral)
+_lb, _ub = extrema(vs)
+lb = _lb # max(_lb, tr.min_val[])
+ub = _ub # min(_ub, tr.max_val[])
+ncolors = length(colscheme) # length(tr.color[])
+d = (ub - lb) / (ncolors + 1)
+bins = [(lb + n * d) for n = 1:ncolors]
+above_isovalue(x, i) = x .>= bins[i]
+get_xy(p) = [p._x, p._y]
+
+scaled_coords = td.delaunay_scale.(xs, ys)
+
+tess = DelaunayTessellation()
+sizehint!(tess, length(scaled_coords))
+push!(tess, Point2D[vd.Point(p...) for p in scaled_coords])
 
 fig = Figure();
-ax = Axis(fig[1,1]);
-# ternaryaxis!(ax; labelx = "hello");
-for edge in pgon.edges
-    lines!(ax, [edge.p1, edge.p2])
+ax = Axis(fig[1, 1]);
+
+for edge in delaunayedges(tess)
+    a = geta(edge)
+    b = getb(edge)
+    Makie.lines!(
+        ax,
+        [
+            Point2(td.delaunay_unscale(get_xy(a)...)...),
+            Point2(td.delaunay_unscale(get_xy(b)...)...),
+        ],
+    )
 end
-fig
 
-# build edges by connecting vertices
-vertices = [pgon.edges[1].p1, pgon.edges[1].p2]
-edge_idxs = collect(2:length(pgon.edges)) # look from the 2nd edge onwards
-while !isempty(edge_idxs)
-    v = last(vertices)
-    
-    i = findfirst(x -> td.point_similar(pgon.edges[x].p1, v) || td.point_similar(pgon.edges[x].p2, v), edge_idxs)
-    if td.point_similar(pgon.edges[edge_idxs[i]].p1, v)
-        push!(vertices, pgon.edges[edge_idxs[i]].p2)
+level = 1
+for (p, v) in zip(scaled_coords, vs)
+    # scatter!(ax, [Makie.Point2(td.delaunay_unscale(p...)...),]; color = above_isovalue(v, level) ? :red : :black)
+
+    scatter!(
+        ax,
+        [Makie.Point2(td.delaunay_unscale(p...)...)];
+        color = get(colscheme, v, (lb, ub)),
+    )
+end
+
+interp_point(_high_v, _low_v, _p_high, _p_low, level) = begin
+    if _high_v > _low_v
+        high_v = _high_v
+        low_v = _low_v
+        p_high = _p_high
+        p_low = _p_low
     else
-        push!(vertices, pgon.edges[edge_idxs[i]].p1)
+        high_v = _low_v
+        low_v = _high_v
+        p_high = _p_low
+        p_low = _p_high
     end
-    
-    deleteat!(edge_idxs, i)
-end
-push!(vertices, pgon.edges[1].p1) # complete shape
 
-# draw polygon
-poly!(ax, 
-    vertices;
-    color = :red,
-) 
+    frac = (bins[level] - low_v) / (high_v - low_v)
+    d = p_high - p_low
+    return d * frac + p_low
+end
+
+level_dpoints = Dict{Int64,Vector{Tuple{Vector{Float64},Vector{Float64}}}}()
+for triangle in tess
+    for level = 1:ncolors
+        a = get_xy(geta(triangle))
+        a_idx = argmin(norm(x - a) for x in scaled_coords)
+        a_above = above_isovalue(vs[a_idx], level)
+
+        b = get_xy(getb(triangle))
+        b_idx = argmin(norm(x - b) for x in scaled_coords)
+        b_above = above_isovalue(vs[b_idx], level)
+
+        c = get_xy(getc(triangle))
+        c_idx = argmin(norm(x - c) for x in scaled_coords)
+        c_above = above_isovalue(vs[c_idx], level)
+
+        p_ab = nothing
+        if a_above && !b_above || !a_above && b_above
+            p_ab = interp_point(vs[a_idx], vs[b_idx], a, b, level)
+        end
+        p_ac = nothing
+        if a_above && !c_above || !a_above && c_above
+            p_ac = interp_point(vs[a_idx], vs[c_idx], a, c, level)
+        end
+        p_bc = nothing
+        if b_above && !c_above || !b_above && c_above
+            p_bc = interp_point(vs[b_idx], vs[c_idx], b, c, level)
+        end
+
+        if isnothing(p_ab) && !isnothing(p_ac) && !isnothing(p_bc)
+            Makie.lines!(
+                ax,
+                [
+                    Point2(td.delaunay_unscale(p_ac...)...),
+                    Point2(td.delaunay_unscale(p_bc...)...),
+                ],
+                color = :black,
+            )
+            push!(
+                get!(level_dpoints, level, []),
+                (
+                    Point2(td.delaunay_unscale(p_ac...)...),
+                    Point2(td.delaunay_unscale(p_bc...)...),
+                ),
+            )
+        elseif isnothing(p_ac) && !isnothing(p_ab) && !isnothing(p_bc)
+            Makie.lines!(
+                ax,
+                [
+                    Point2(td.delaunay_unscale(p_ab...)...),
+                    Point2(td.delaunay_unscale(p_bc...)...),
+                ],
+                color = :black,
+            )
+            push!(
+                get!(level_dpoints, level, []),
+                (
+                    Point2(td.delaunay_unscale(p_ab...)...),
+                    Point2(td.delaunay_unscale(p_bc...)...),
+                ),
+            )
+        elseif isnothing(p_bc) && !isnothing(p_ac) && !isnothing(p_ab)
+            Makie.lines!(
+                ax,
+                [
+                    Point2(td.delaunay_unscale(p_ac...)...),
+                    Point2(td.delaunay_unscale(p_ab...)...),
+                ],
+                color = :black,
+            )
+            push!(
+                get!(level_dpoints, level, []),
+                (
+                    Point2(td.delaunay_unscale(p_ac...)...),
+                    Point2(td.delaunay_unscale(p_ab...)...),
+                ),
+            )
+        end
+    end
+end
+
+
+td.ternaryaxis!(ax; labelx = "hello");
 
 fig
+
+##############
