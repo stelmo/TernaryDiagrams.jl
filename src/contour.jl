@@ -1,3 +1,11 @@
+function generate_padded_data(xs, ys, ws)
+    pad_coords = [
+        td.delaunay_scale(td.from_bary_to_cart(a1, a2, 1.0 - a1 - a2)...) for
+        a1 = 0:0.1:1 for a2 = 0:0.1:1 if 1.0 - a1 - a2 >= 0
+    ]
+
+end
+
 function Makie.plot!(tr::TernaryContour)
 
     # create observables
@@ -24,14 +32,21 @@ function Makie.plot!(tr::TernaryContour)
     ub = min(maximum(ws[]), tr.clip_max_w[])
     d = (ub - lb) / (tr.levels[] + 1)
     bins = [(lb + n * d) for n = 1:tr.levels[]]
-    above_isovalue(x, i) = x .>= bins[i]
-    get_xy(p) = [p._x, p._y]
+    above_isovalue(x, i) = x >= bins[i]
 
-    scaled_coords = delaunay_scale.(xs[], ys[])
+    if tr.pad_data[]
+        data_coords = delaunay_scale.(xs[], ys[])
+        pad_coords, pad_weights = generate_padded_data(xs[], ys[], ws[])
+        scaled_coords = [data_coords; pad_coords]
+        weights = [ws[]; pad_weights]
+    else
+        scaled_coords = delaunay_scale.(xs[], ys[])
+        weights = ws[]
+    end
 
     tess = vd.DelaunayTessellation()
     vd.sizehint!(tess, length(scaled_coords))
-    push!(tess, vd.Point2D[vd.Point(p...) for p in scaled_coords])
+    push!(tess, [x for x in scaled_coords]) # NB: this modifies the second argument in place!
 
     """
     Interpolate between the vertices of an edge, and return a point that is
@@ -55,73 +70,59 @@ function Makie.plot!(tr::TernaryContour)
         return d * frac + p_low
     end
 
+    level_edges = Dict{Int64,Vector{Vector{gp.Point2D}}}()
     for triangle in tess
         for level = 1:tr.levels[]
-            a = get_xy(vd.geta(triangle))
+            a = gp.geta(triangle)
             a_idx = argmin(norm(x - a) for x in scaled_coords)
-            a_above = above_isovalue(ws[][a_idx], level)
+            a_above = above_isovalue(weights[a_idx], level)
 
-            b = get_xy(vd.getb(triangle))
+            b = gp.getb(triangle)
             b_idx = argmin(norm(x - b) for x in scaled_coords)
-            b_above = above_isovalue(ws[][b_idx], level)
+            b_above = above_isovalue(weights[b_idx], level)
 
-            c = get_xy(vd.getc(triangle))
+            c = gp.getc(triangle)
             c_idx = argmin(norm(x - c) for x in scaled_coords)
-            c_above = above_isovalue(ws[][c_idx], level)
+            c_above = above_isovalue(weights[c_idx], level)
 
             p_ab = nothing
-            if a_above && !b_above || !a_above && b_above
-                p_ab = interp_point(ws[][a_idx], ws[][b_idx], a, b, level)
+            if (a_above && !b_above) || (!a_above && b_above)
+                p_ab = interp_point(weights[a_idx], weights[b_idx], a, b, level)
             end
             p_ac = nothing
-            if a_above && !c_above || !a_above && c_above
-                p_ac = interp_point(ws[][a_idx], ws[][c_idx], a, c, level)
+            if (a_above && !c_above) || (!a_above && c_above)
+                p_ac = interp_point(weights[a_idx], weights[c_idx], a, c, level)
             end
             p_bc = nothing
-            if b_above && !c_above || !b_above && c_above
-                p_bc = interp_point(ws[][b_idx], ws[][c_idx], b, c, level)
+            if (b_above && !c_above) || (!b_above && c_above)
+                p_bc = interp_point(weights[b_idx], weights[c_idx], b, c, level)
             end
 
             if isnothing(p_ab) && !isnothing(p_ac) && !isnothing(p_bc)
-                lines!(
-                    tr,
-                    [
-                        Point2(delaunay_unscale(p_ac...)...),
-                        Point2(delaunay_unscale(p_bc...)...),
-                    ],
-                    color = isnothing(tr.color[]) ?
-                            get(tr.colormap[], bins[level], (lb, ub)) : tr.color,
-                    linewidth = tr.linewidth,
-                    linestyle = tr.linestyle,
-                )
+                edge = [p_ac, p_bc]
+                push!(get!(level_edges, level, Vector{Vector{gp.Point2D}}()), edge)
             elseif isnothing(p_ac) && !isnothing(p_ab) && !isnothing(p_bc)
-                lines!(
-                    tr,
-                    [
-                        Point2(delaunay_unscale(p_ab...)...),
-                        Point2(delaunay_unscale(p_bc...)...),
-                    ],
-                    color = isnothing(tr.color[]) ?
-                            get(tr.colormap[], bins[level], (lb, ub)) : tr.color,
-                    linewidth = tr.linewidth,
-                    linestyle = tr.linestyle,
-                )
+                edge = [p_ab, p_bc]
+                push!(get!(level_edges, level, Vector{Vector{gp.Point2D}}()), edge)
             elseif isnothing(p_bc) && !isnothing(p_ac) && !isnothing(p_ab)
-                lines!(
-                    tr,
-                    [
-                        Point2(delaunay_unscale(p_ac...)...),
-                        Point2(delaunay_unscale(p_ab...)...),
-                    ],
-                    color = isnothing(tr.color[]) ?
-                            get(tr.colormap[], bins[level], (lb, ub)) : tr.color,
-                    linewidth = tr.linewidth,
-                    linestyle = tr.linestyle,
-                )
+                edge = [p_ac, p_ab]
+                push!(get!(level_edges, level, Vector{Vector{gp.Point2D}}()), edge)
             end
         end
     end
 
+    for level = 1:tr.levels[]
+        for edge in level_edges[level]
+            lines!(
+                tr,
+                [Point2(delaunay_unscale(pnt)...) for pnt in edge],
+                color = isnothing(tr.color[]) ? get(tr.colormap[], bins[level], (lb, ub)) :
+                        tr.color,
+                linewidth = tr.linewidth,
+                linestyle = tr.linestyle,
+            )
+        end
+    end
 
     tr
 end

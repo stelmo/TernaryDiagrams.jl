@@ -5,13 +5,14 @@ using TernaryDiagrams
 const td = TernaryDiagrams
 import GeometricalPredicates, VoronoiDelaunay, LinearAlgebra, Interpolations
 const vd = VoronoiDelaunay
+const gp = GeometricalPredicates
 using JLD2
 
-N = 300
-a1 = load("test/data.jld2", "a1")[1:N]
-a2 = load("test/data.jld2", "a2")[1:N]
-a3 = load("test/data.jld2", "a3")[1:N]
-ws = Float64.(load("test/data.jld2", "mus"))[1:N]
+
+a1 = load("test/data.jld2", "a1")
+a2 = load("test/data.jld2", "a2")
+a3 = load("test/data.jld2", "a3")
+ws = Float64.(load("test/data.jld2", "mus"))
 
 fig = Figure();
 ax = Axis(fig[1, 1]);
@@ -23,7 +24,7 @@ ternarycontour!(
     a2,
     a3,
     ws;
-    levels = 25,
+    levels = 5,
     color = nothing,
     colormap = reverse(ColorSchemes.Spectral),
 )
