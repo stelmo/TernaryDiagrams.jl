@@ -17,16 +17,17 @@ ws = Float64.(load("test/data.jld2", "mus"))
 fig = Figure();
 ax = Axis(fig[1, 1]);
 
-ternaryaxis!(ax);
 ternarycontour!(
     ax,
     a1,
     a2,
     a3,
     ws;
-    levels = 5,
+    levels = 8,
+    linewidth = 1,
     color = nothing,
     colormap = reverse(ColorSchemes.Spectral),
+    pad_data = true,
 )
 
 ternaryscatter!(
@@ -36,6 +37,8 @@ ternaryscatter!(
     a3;
     color = [get(reverse(ColorSchemes.Spectral), w, extrema(ws)) for w in ws],
 )
+
+ternaryaxis!(ax);
 
 xlims!(ax, -0.2, 1.2)
 ylims!(ax, -0.3, 1.1)

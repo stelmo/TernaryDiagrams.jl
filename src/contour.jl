@@ -1,9 +1,74 @@
-function generate_padded_data(xs, ys, ws)
+function generate_padded_data(data_coords, ws)
     pad_coords = [
-        td.delaunay_scale(td.from_bary_to_cart(a1, a2, 1.0 - a1 - a2)...) for
-        a1 = 0:0.1:1 for a2 = 0:0.1:1 if 1.0 - a1 - a2 >= 0
+        delaunay_scale(from_bary_to_cart(a1, a2, 1.0 - a1 - a2)...) for a1 = 0:0.1:1 for
+        a2 = 0:0.1:1 if 1.0 - a1 - a2 >= 0
     ]
+    pad_weights = Float64[]
 
+    for p in pad_coords
+        ds = [norm(p - x) for x in data_coords]
+        idxs = sortperm(ds)[1:15] # this can be optimized
+        dtot = sum(ds[idxs])
+        w = sum(ws[idx] * ds[idx] / dtot for idx in idxs)
+        push!(pad_weights, w)
+
+        # idx = argmin(ds)
+        # push!(pad_weights, ws[idx])
+    end
+
+    pad_coords, pad_weights
+end
+
+function edge_in_curve(edge, curve)
+    for curve_edge in curve
+        if norm(first(curve_edge) - first(edge)) < tol ||
+           norm(last(curve_edge) - last(edge)) < tol ||
+           norm(first(curve_edge) - last(edge)) < tol ||
+           norm(last(curve_edge) - first(edge)) < tol
+            return true
+        end
+    end
+    false
+end
+
+function split_edges(edges::Vector{Vector{gp.Point2D}})
+    curves = Vector{Vector{gp.Point2D}}()
+    push!(curves, first(edges)) # initialize
+    edge_idxs = collect(2:length(edges))
+
+    while !isempty(edge_idxs)
+        used_edge_idx = 0
+        for (i, e_idx) in enumerate(edge_idxs)
+            edge = edges[e_idx]
+            for (c_idx, curve) in enumerate(curves)
+                if norm(last(curve) - first(edge)) < tol
+                    curves[c_idx] = [curve; last(edge)]
+                    used_edge_idx = i
+                    break
+                elseif norm(last(curve) - last(edge)) < tol
+                    curves[c_idx] = [curve; first(edge)]
+                    used_edge_idx = i
+                    break
+                elseif norm(first(curve) - last(edge)) < tol
+                    curves[c_idx] = [first(edge); curve]
+                    used_edge_idx = i
+                    break
+                elseif norm(first(curve) - first(edge)) < tol
+                    curves[c_idx] = [last(edge); curve]
+                    used_edge_idx = i
+                    break
+                end
+            end
+        end
+        if used_edge_idx == 0
+            i = first(edge_idxs)
+            push!(curves, edges[i])
+            deleteat!(edge_idxs, 1)
+        else
+            deleteat!(edge_idxs, used_edge_idx)
+        end
+    end
+    curves
 end
 
 function Makie.plot!(tr::TernaryContour)
@@ -36,7 +101,7 @@ function Makie.plot!(tr::TernaryContour)
 
     if tr.pad_data[]
         data_coords = delaunay_scale.(xs[], ys[])
-        pad_coords, pad_weights = generate_padded_data(xs[], ys[], ws[])
+        pad_coords, pad_weights = generate_padded_data(data_coords, ws[])
         scaled_coords = [data_coords; pad_coords]
         weights = [ws[]; pad_weights]
     else
@@ -112,10 +177,10 @@ function Makie.plot!(tr::TernaryContour)
     end
 
     for level = 1:tr.levels[]
-        for edge in level_edges[level]
+        for curve in split_edges(level_edges[level])
             lines!(
                 tr,
-                [Point2(delaunay_unscale(pnt)...) for pnt in edge],
+                [Point2(delaunay_unscale(vertex)...) for vertex in curve],
                 color = isnothing(tr.color[]) ? get(tr.colormap[], bins[level], (lb, ub)) :
                         tr.color,
                 linewidth = tr.linewidth,

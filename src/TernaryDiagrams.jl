@@ -102,8 +102,9 @@ z = 1`. The weight of the coordinates is passed through `w`.
 ## Notes 
 - `colormap` and `color` both apply to the color of the isolines. Thus, one of
    them must be set to `nothing` to draw the correct on the isoclines.
--  `pad_data` adds extra data points, linearly interpolated based on the current
-   points, for the purpose of generating prettier isoclines.
+-  `pad_data` adds extra data points for the purpose of generating prettier
+   isoclines. These padded points take the weight value of the closest actual
+   data point's weight.  
 
 ## Attributes
 $(Makie.ATTRIBUTES)
