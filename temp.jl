@@ -7,7 +7,6 @@ using GeometricalPredicates, VoronoiDelaunay, LinearAlgebra, Interpolations
 const vd = VoronoiDelaunay
 using JLD2
 
-
 a1 = load("data.jld2", "a1")
 a2 = load("data.jld2", "a2")
 a3 = load("data.jld2", "a3")

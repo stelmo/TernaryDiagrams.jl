@@ -3,6 +3,7 @@ module TernaryDiagrams
 using Makie, LinearAlgebra, ColorSchemes, DocStringExtensions
 import GeometricalPredicates, VoronoiDelaunay, Interpolations
 const vd = VoronoiDelaunay
+const gp = GeometricalPredicates
 
 # default coordinates of triangle
 const r1 = [0, 0]
@@ -121,7 +122,8 @@ include("contour.jl")
 # """
 # @recipe(TernaryContourf, x, y, z, w) do scene
 #     Attributes(
-#         color = ColorSchemes.Spectral,
+#         color = reverse(ColorSchemes.Spectral),
+#         levels = 5,
 #         clip_min_w = -Inf,
 #         clip_max_w = Inf,
 #     )
