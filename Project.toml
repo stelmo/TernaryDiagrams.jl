@@ -15,6 +15,7 @@ Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 VoronoiDelaunay = "72f80fcb-8c52-57d9-aff0-40c1a3526986"
 
 [compat]
+VoronoiDelaunay = "0.4"
 julia = "1"
 
 [extras]
