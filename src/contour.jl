@@ -169,7 +169,7 @@ function Makie.plot!(tr::TernaryContour)
     ub = min(maximum(ws[]), tr.clip_max_w[])
     d = (ub - lb) / (tr.levels[] + 1)
     bins = [(lb + n * d) for n = 1:tr.levels[]]
-    
+
     if tr.pad_data[]
         data_coords = delaunay_scale.(xs[], ys[])
         pad_coords, pad_weights = generate_padded_data(data_coords, ws[])
@@ -181,7 +181,7 @@ function Makie.plot!(tr::TernaryContour)
     end
 
     level_edges = contour_triangle(scaled_coords, bins, weights, tr.levels[])
-    
+
     for level = 1:tr.levels[]
         for curve in split_edges(level_edges[level])
             lines!(

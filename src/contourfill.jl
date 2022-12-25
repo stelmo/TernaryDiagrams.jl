@@ -50,13 +50,13 @@ function Makie.plot!(tr::TernaryContourf)
                 # )
 
                 lines!(
-                        tr,
-                        [Point2(delaunay_unscale(vertex)...) for vertex in curve],
-                        color = isnothing(tr.color[]) ? get(tr.colormap[], bins[level], (lb, ub)) :
-                                tr.color,
-                        linewidth = tr.linewidth,
-                        linestyle = tr.linestyle,
-                    )
+                    tr,
+                    [Point2(delaunay_unscale(vertex)...) for vertex in curve],
+                    color = isnothing(tr.color[]) ?
+                            get(tr.colormap[], bins[level], (lb, ub)) : tr.color,
+                    linewidth = tr.linewidth,
+                    linestyle = tr.linestyle,
+                )
             else
 
             end
@@ -65,4 +65,3 @@ function Makie.plot!(tr::TernaryContourf)
     @info "num cc = $cc"
     tr
 end
-
