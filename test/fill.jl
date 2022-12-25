@@ -1,11 +1,50 @@
-using Makie, LinearAlgebra, ColorSchemes, DocStringExtensions
-import GeometricalPredicates, VoronoiDelaunay, Interpolations
+using Revise
+using CairoMakie
+using ColorSchemes
+using TernaryDiagrams
+const td = TernaryDiagrams
+import GeometricalPredicates, VoronoiDelaunay, LinearAlgebra, Interpolations
 const vd = VoronoiDelaunay
 const gp = GeometricalPredicates
+using JLD2
 
-a = gp.Point(1.5, 1.5)
-b = gp.Point(1.1, 1.1)
-c = l = gp.Line(a, b)
-println(gp.orientation(l, gp.Point(1.8, 1.6)))
-println(gp.orientation(l, gp.Point(1.6, 1.8)))
+a1 = load("test/data.jld2", "a1")
+a2 = load("test/data.jld2", "a2")
+a3 = load("test/data.jld2", "a3")
+ws = Float64.(load("test/data.jld2", "mus"))
 
+fig = Figure();
+ax = Axis(fig[1, 1]);
+
+ternarycontourf!(
+    ax,
+    a1,
+    a2,
+    a3,
+    ws;
+    levels = 20,
+    pad_data = true,
+)
+
+# ternarycontour!(
+#     ax,
+#     a1,
+#     a2,
+#     a3,
+#     ws;
+#     levels = 20,
+#     linewidth = 0.5,
+#     color = :black,
+#     pad_data = true,
+# )
+
+# ternaryaxis!(ax);
+
+xlims!(ax, -0.2, 1.2)
+ylims!(ax, -0.3, 1.1)
+hidedecorations!(ax)
+fig
+
+using FileIO
+
+FileIO.save("fig.pdf", fig)

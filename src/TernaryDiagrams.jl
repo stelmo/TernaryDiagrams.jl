@@ -14,7 +14,7 @@ const R = [
     r1 r2 r3
 ]
 const invR = inv(R)
-const tol = 1e-5
+const tol = 1e-3
 
 from_cart_to_bary(x, y) = invR * [1, x, y]
 from_bary_to_cart(a1, a2, a3) = (R*[a1, a2, a3])[2:3]
@@ -122,26 +122,29 @@ $(Makie.ATTRIBUTES)
     )
 end
 
-include("contour.jl")
+include("contour.jl") # must be loaded before fill.jl because it loads functions used in fill.jl
 
-# """
-# TernaryContourf
+"""
+TernaryContourf
 
-# Draw a filled contour plot using barycentric coordindates, `x`, `y`, `z`, i.e.
-# `x + y + z = 1`. The weight of the coordinates is passed through `w`.
+Draw a filled contour plot using barycentric coordindates, `x`, `y`, `z`, i.e.
+`x + y + z = 1`. The weight of the coordinates is passed through `w`.
 
-# ## Attributes
-# $(Makie.ATTRIBUTES)
-# """
-# @recipe(TernaryContourf, x, y, z, w) do scene
-#     Attributes(
-#         color = reverse(ColorSchemes.Spectral),
-#         levels = 5,
-#         clip_min_w = -Inf,
-#         clip_max_w = Inf,
-#     )
-# end
+## Notes
 
-# include("fill.jl")
+## Attributes
+$(Makie.ATTRIBUTES)
+"""
+@recipe(TernaryContourf, x, y, z, w) do scene
+    Attributes(
+        colormap = reverse(ColorSchemes.Spectral),
+        levels = 5,
+        clip_min_w = -Inf,
+        clip_max_w = Inf,
+        pad_data = false,
+    )
+end
+
+include("fill.jl")
 
 end
