@@ -30,17 +30,21 @@ weights = [ws; pad_weights]
 level_edges = td.contour_triangle(scaled_coords, bins, weights, levels)
 
 fig = Figure();
-ax = Axis(fig[1,1]);
-for level in 1:levels
-# level = 2
-curves = td.split_edges(level_edges[level])
+ax = Axis(fig[1, 1]);
+for level = 1:levels
+    # level = 2
+    curves = td.split_edges(level_edges[level])
     for curve in curves
         if td.is_closed(curve)
             color = :red
         else
             color = :black
         end
-        lines!(ax, [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve]; color)
+        lines!(
+            ax,
+            [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve];
+            color,
+        )
     end
 end
 fig
@@ -60,5 +64,5 @@ end
 
 on_bottom_edge(pnt) = begin
     # from (0,0) to (1,0)
-    abs(pnt._y) <= TOL && -TOL <= pnt._x <= 1.0 + TOL 
+    abs(pnt._y) <= TOL && -TOL <= pnt._x <= 1.0 + TOL
 end

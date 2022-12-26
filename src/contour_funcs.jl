@@ -1,9 +1,22 @@
+"""
+Represents an edge which is two points.
+"""
 struct Edge
     p1::gp.Point2D
     p2::gp.Point2D
 end
 Base.first(edge::Edge) = edge.p1
 Base.last(edge::Edge) = edge.p2
+
+"""
+Represents the orientation of a point. Used to indicate in which direction the
+larger weight lies.
+"""
+struct PointDirection
+    p::gp.Point2D
+    low::gp.Point2D
+    high::gp.Point2D
+end
 
 """
 Generate coordinates along the edges of the triangle. Interpolates weights based
@@ -128,7 +141,7 @@ function contour_triangle(scaled_coords, bins, weights, levels)
     end
 
     level_edges = Dict{Int64,Vector{Edge}}()
-    
+    orientation_points = Vector{PointDirection}()
     for triangle in tess
         for level = 1:levels
             a = gp.geta(triangle)

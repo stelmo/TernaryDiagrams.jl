@@ -39,21 +39,21 @@ function Makie.plot!(tr::TernaryContourf)
 
     for level = 1:tr.levels[]
         for curve in split_edges(level_edges[level])
-            if is_closed(curve)                
+            if is_closed(curve)
                 poly!(
                     tr,
                     [Point2f(delaunay_unscale(vertex)...) for vertex in curve],
-                    color = get(tr.colormap[], bins[level], (lb, ub))
+                    color = get(tr.colormap[], bins[level], (lb, ub)),
                 )
             else
                 lines!(
                     tr,
                     [Point2f(delaunay_unscale(vertex)...) for vertex in curve],
-                    color = get(tr.colormap[], bins[level], (lb, ub))
+                    color = get(tr.colormap[], bins[level], (lb, ub)),
                 )
             end
         end
     end
-    
+
     tr
 end
