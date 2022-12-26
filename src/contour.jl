@@ -34,7 +34,7 @@ end
 function split_edges(edges::Vector{Vector{gp.Point2D}})
     curves = Vector{Vector{gp.Point2D}}()
     push!(curves, first(edges)) # initialize
-    edge_idxs = collect(2:length(edges))
+    edge_idxs = collect(2:length(edges)) #  edges left to group
 
     while !isempty(edge_idxs)
         used_edge_idx = 0
@@ -59,6 +59,7 @@ function split_edges(edges::Vector{Vector{gp.Point2D}})
                     break
                 end
             end
+            used_edge_idx != 0 && break
         end
         if used_edge_idx == 0
             i = first(edge_idxs)

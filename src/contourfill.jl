@@ -38,30 +38,24 @@ function Makie.plot!(tr::TernaryContourf)
     end
 
     level_edges = contour_triangle(scaled_coords, bins, weights, tr.levels[])
-    cc = 0
+
     for level = 1:tr.levels[]
         for curve in split_edges(level_edges[level])
-            if is_closed(curve)
-                cc += 1
-                # poly!(
-                #     tr,
-                #     [Point2f(delaunay_unscale(vertex)...) for vertex in [last(curve); curve]],
-                #     color = get(tr.colormap[], bins[level], (lb, ub))
-                # )
-
-                lines!(
+            if is_closed(curve)                
+                poly!(
                     tr,
-                    [Point2(delaunay_unscale(vertex)...) for vertex in curve],
-                    color = isnothing(tr.color[]) ?
-                            get(tr.colormap[], bins[level], (lb, ub)) : tr.color,
-                    linewidth = tr.linewidth,
-                    linestyle = tr.linestyle,
+                    [Point2f(delaunay_unscale(vertex)...) for vertex in curve],
+                    color = get(tr.colormap[], bins[level], (lb, ub))
                 )
             else
-
+                lines!(
+                    tr,
+                    [Point2f(delaunay_unscale(vertex)...) for vertex in curve],
+                    color = get(tr.colormap[], bins[level], (lb, ub))
+                )
             end
         end
     end
-    @info "num cc = $cc"
+    
     tr
 end

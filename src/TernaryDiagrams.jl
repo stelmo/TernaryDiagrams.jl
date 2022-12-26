@@ -14,7 +14,7 @@ const R = [
     r1 r2 r3
 ]
 const invR = inv(R)
-const tol = 1e-3
+const tol = 1e-6
 
 from_cart_to_bary(x, y) = invR * [1, x, y]
 from_bary_to_cart(a1, a2, a3) = (R*[a1, a2, a3])[2:3]
@@ -101,7 +101,7 @@ z = 1`. The weight of the coordinates is passed through `w`.
 
 ## Notes 
 - `colormap` and `color` both apply to the color of the isolines. Thus, one of
-   them must be set to `nothing` to draw the correct on the isoclines.
+   them must be set to `nothing` to draw the correct coloredv isoclines.
 -  `pad_data` adds extra data points for the purpose of generating prettier
    isoclines. These padded points take the weight value of the closest actual
    data point's weight.  
@@ -141,7 +141,7 @@ $(Makie.ATTRIBUTES)
         levels = 5,
         clip_min_w = -Inf,
         clip_max_w = Inf,
-        pad_data = false,
+        pad_data = true,
     )
 end
 
