@@ -30,6 +30,8 @@ Base.:(+)(a::gp.Point2D, b::gp.Point2D) = gp.Point2D(a._x + b._x, a._y + b._y)
 Base.:(*)(a::gp.Point2D, b::Float64) = gp.Point2D(a._x * b, a._y * b)
 LinearAlgebra.norm(a::gp.Point2D) = sqrt(a._x^2 + a._y^2)
 
+include("contour_funcs.jl")
+
 """
 TernaryAxis
 
@@ -122,7 +124,7 @@ $(Makie.ATTRIBUTES)
     )
 end
 
-include("contour.jl") # must be loaded before fill.jl because it loads functions used in fill.jl
+include("contour.jl")
 
 """
 TernaryContourf

@@ -15,11 +15,8 @@ ws = Float64.(load("test/data.jld2", "mus"))
 
 fig = Figure();
 ax = Axis(fig[1, 1]);
-
-ternarycontourf!(ax, a1, a2, a3, ws; levels = 20, pad_data = true)
-
+ternarycontourf!(ax, a1, a2, a3, ws; levels = 15, pad_data = true)
 ternaryaxis!(ax);
-
 xlims!(ax, -0.2, 1.2)
 ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax)

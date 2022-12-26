@@ -31,8 +31,8 @@ level_edges = td.contour_triangle(scaled_coords, bins, weights, levels)
 
 fig = Figure();
 ax = Axis(fig[1,1]);
-# for level in 1:levels
-level = 2
+for level in 1:levels
+# level = 2
 curves = td.split_edges(level_edges[level])
     for curve in curves
         if td.is_closed(curve)
@@ -42,17 +42,23 @@ curves = td.split_edges(level_edges[level])
         end
         lines!(ax, [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve]; color)
     end
-# end
+end
 fig
 
+const r1 = [0, 0]
+const r2 = [1, 0]
+const r3 = [0.5, sqrt(3) / 2]
+
 on_left_edge(pnt) = begin
-    
+    # from (0,0) to (0.5, sqrt(3)/2)
 end
 
 on_right_edge(pnt) = begin
-    
+    # from (1,0) to (0.5, sqrt(3)/2)
+
 end
 
 on_bottom_edge(pnt) = begin
-    
+    # from (0,0) to (1,0)
+    abs(pnt._y) <= tol && -tol <= pnt._x <= 1.0 + tol 
 end

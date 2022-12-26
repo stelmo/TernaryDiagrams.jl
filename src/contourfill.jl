@@ -1,5 +1,3 @@
-is_closed(curve) = norm(first(curve) - last(curve)) < tol
-
 function Makie.plot!(tr::TernaryContourf)
 
     # create observables
