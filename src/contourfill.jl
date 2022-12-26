@@ -25,35 +25,42 @@ function Makie.plot!(tr::TernaryContourf)
     d = (ub - lb) / (tr.levels[] + 1)
     bins = [(lb + n * d) for n = 1:tr.levels[]]
 
-    if tr.pad_data[]
-        data_coords = delaunay_scale.(xs[], ys[])
-        pad_coords, pad_weights = generate_padded_data(data_coords, ws[])
-        scaled_coords = [data_coords; pad_coords]
-        weights = [ws[]; pad_weights]
-    else
-        scaled_coords = delaunay_scale.(xs[], ys[])
-        weights = ws[]
-    end
+    # always pad data to make filling easier
+    data_coords = delaunay_scale.(xs[], ys[])
+    pad_coords, pad_weights = generate_padded_data(data_coords, ws[])
+    _scaled_coords = [data_coords; pad_coords]
+    _weights = [ws[]; pad_weights]
 
-    level_edges, pdirs = contour_triangle(scaled_coords, bins, weights, tr.levels[])
-    curves = Vector{Tuple{Int64,Curve}}()
+    scaled_coords, weights = rem_repeats(_scaled_coords, _weights)
 
-    for level = 1:tr.levels[]
+    level_edges, point_directions = contour_triangle(scaled_coords, bins, weights, tr.levels[])
+    level_open_curves = Dict{Int64, Vector{Curve}}()
+    level_closed_curves = Dict{Int64, Vector{Curve}}()
+
+    for level in 1:tr.levels[]
         for curve in split_edges(level_edges[level])
             if is_closed(curve)
-                poly!(
-                    tr,
-                    [Point2f(delaunay_unscale(vertex)...) for vertex in curve],
-                    color = get(tr.colormap[], bins[level], (lb, ub)),
-                )
+                push!(get!(level_closed_curves, level, Vector{Curve}()), curve)
             else
-                push!(curves, (level, curve))
+                push!(get!(level_open_curves, level, Vector{Curve}()), curve)
             end
         end
     end
 
+    # draw
+
+    for level in 1:tr.levels[]
+
+    end
     tr
 end
+
+# poly!(
+#     tr,
+#     [Point2f(delaunay_unscale(vertex)...) for vertex in curve],
+#     color = get(tr.colormap[], bins[level], (lb, ub)),
+# )
+
 
 # lines!(
 #     tr,

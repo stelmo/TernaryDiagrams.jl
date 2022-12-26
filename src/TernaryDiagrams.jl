@@ -138,6 +138,8 @@ Draw a filled contour plot using barycentric coordindates, `x`, `y`, `z`, i.e.
 `x + y + z = 1`. The weight of the coordinates is passed through `w`.
 
 ## Notes
+The data is always padded to make filling the entire plot area easier. Padded
+data is interpolated based on the nearest data point.
 
 ## Attributes
 $(Makie.ATTRIBUTES)
@@ -148,7 +150,6 @@ $(Makie.ATTRIBUTES)
         levels = 5,
         clip_min_w = -Inf,
         clip_max_w = Inf,
-        pad_data = true,
     )
 end
 

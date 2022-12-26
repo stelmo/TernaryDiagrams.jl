@@ -14,7 +14,7 @@ ws = Float64.(load("test/data.jld2", "mus"))
 xs, ys = td.from_bary_to_cart(a1, a2, a3)
 
 # colormap
-levels = 5
+levels = 10
 
 lb = minimum(ws)
 ub = maximum(ws)
@@ -23,10 +23,12 @@ bins = [(lb + n * d) for n = 1:levels]
 
 data_coords = td.delaunay_scale.(xs, ys)
 pad_coords, pad_weights = td.generate_padded_data(data_coords, ws)
-scaled_coords = [data_coords; pad_coords]
-weights = [ws; pad_weights]
+_scaled_coords = [data_coords; pad_coords]
+_weights = [ws; pad_weights]
 
-level_edges, pdirs = td.contour_triangle(scaled_coords, bins, weights, levels)
+scaled_coords, weights = td.rem_repeats(_scaled_coords, _weights)
+
+level_edges, point_directions = td.contour_triangle(scaled_coords, bins, weights, levels)
 
 fig = Figure();
 ax = Axis(fig[1, 1]);
@@ -34,54 +36,60 @@ for level = 1:levels
     # level = 5
     curves = td.split_edges(level_edges[level])
     for curve in curves
-        td.is_closed(curve) && continue
+        if td.is_closed(curve)
+            lines!(
+                ax,
+                [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve];
+                color = :green,
+            )
+        else
+            p1 = first(curve)
+            p1_idx = argmin(norm(p1 - x.point) for x in point_directions)
+            pend = last(curve)
+            pend_idx = argmin(norm(pend - x.point) for x in point_directions)
+            
+            scatter!(
+                ax,
+                [
+                    Makie.Point2(td.delaunay_unscale(point_directions[idx].low)...) for
+                    idx in [p1_idx, pend_idx]
+                ];
+                color = :blue,
+            )
 
-        p1 = first(curve)
-        p1_idx = argmin(norm(p1 - x.p) for x in pdirs)
-        pend = last(curve)
-        pend_idx = argmin(norm(pend - x.p) for x in pdirs)
+            scatter!(
+                ax,
+                [
+                    Makie.Point2(td.delaunay_unscale(point_directions[idx].high)...) for
+                    idx in [p1_idx, pend_idx]
+                ];
+                color = :red,
+            )
 
-        scatter!(
-            ax,
-            [
-                Makie.Point2(td.delaunay_unscale(pdirs[idx].low)...) for
-                idx in [p1_idx, pend_idx]
-            ];
-            color = :blue,
-        )
-
-        scatter!(
-            ax,
-            [
-                Makie.Point2(td.delaunay_unscale(pdirs[idx].high)...) for
-                idx in [p1_idx, pend_idx]
-            ];
-            color = :red,
-        )
-
-        lines!(
-            ax,
-            [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve];
-            color = :black,
-        )
+            lines!(
+                ax,
+                [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve];
+                color = :black,
+            )
+        end
     end
 end
 fig
 
-const r1 = [0, 0]
-const r2 = [1, 0]
-const r3 = [0.5, sqrt(3) / 2]
+level_open_curves = Dict{Int64, Vector{td.Curve}}()
+level_closed_curves = Dict{Int64, Vector{td.Curve}}()
 
-on_left_edge(pnt) = begin
-    # from (0,0) to (0.5, sqrt(3)/2)
+for level in 1:levels
+    for curve in td.split_edges(level_edges[level])
+        if td.is_closed(curve)
+            push!(get!(level_closed_curves, level, Vector{td.Curve}()), curve)
+        else
+            push!(get!(level_open_curves, level, Vector{td.Curve}()), curve)
+        end
+    end
 end
 
-on_right_edge(pnt) = begin
-    # from (1,0) to (0.5, sqrt(3)/2)
+td.ternaryaxis!(ax)
+fig
 
-end
-
-on_bottom_edge(pnt) = begin
-    # from (0,0) to (1,0)
-    abs(pnt._y) <= TOL && -TOL <= pnt._x <= 1.0 + TOL
-end
+Makie.FileIO.save("fig.pdf", fig)

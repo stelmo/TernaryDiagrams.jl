@@ -28,16 +28,18 @@ function Makie.plot!(tr::TernaryContour)
     if tr.pad_data[]
         data_coords = delaunay_scale.(xs[], ys[])
         pad_coords, pad_weights = generate_padded_data(data_coords, ws[])
-        scaled_coords = [data_coords; pad_coords]
-        weights = [ws[]; pad_weights]
+        _scaled_coords = [data_coords; pad_coords]
+        _weights = [ws[]; pad_weights]
     else
-        scaled_coords = delaunay_scale.(xs[], ys[])
-        weights = ws[]
+        _scaled_coords = delaunay_scale.(xs[], ys[])
+        _weights = ws[]
     end
 
+    scaled_coords, weights = rem_repeats(_scaled_coords, _weights)
+    
     level_edges, _ = contour_triangle(scaled_coords, bins, weights, tr.levels[])
 
-    for level = 1:tr.levels[]
+    for level in 1:tr.levels[]
         for curve in split_edges(level_edges[level])
             lines!(
                 tr,
