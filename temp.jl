@@ -60,5 +60,5 @@ end
 
 on_bottom_edge(pnt) = begin
     # from (0,0) to (1,0)
-    abs(pnt._y) <= tol && -tol <= pnt._x <= 1.0 + tol 
+    abs(pnt._y) <= TOL && -TOL <= pnt._x <= 1.0 + TOL 
 end

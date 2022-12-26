@@ -14,7 +14,7 @@ const R = [
     r1 r2 r3
 ]
 const invR = inv(R)
-const tol = 1e-6
+const TOL = 1e-6
 
 from_cart_to_bary(x, y) = invR * [1, x, y]
 from_bary_to_cart(a1, a2, a3) = (R*[a1, a2, a3])[2:3]

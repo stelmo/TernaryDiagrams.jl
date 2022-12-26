@@ -5,6 +5,10 @@ end
 Base.first(edge::Edge) = edge.p1
 Base.last(edge::Edge) = edge.p2
 
+"""
+Generate coordinates along the edges of the triangle. Interpolates weights based
+on nearest known weight.
+"""
 function generate_padded_data(data_coords, ws)
     pad_coords = [
         delaunay_scale(from_bary_to_cart(a1, a2, 1.0 - a1 - a2)...) for a1 = 0:0.1:1 for
@@ -26,22 +30,29 @@ function generate_padded_data(data_coords, ws)
     pad_coords, pad_weights
 end
 
+"""
+Returns true if `edge` can be connected to the ends of the `curve`.
+"""
 function edge_in_curve(edge, curve)
     for curve_edge in curve
-        if norm(first(curve_edge) - first(edge)) < tol ||
-           norm(last(curve_edge) - last(edge)) < tol ||
-           norm(first(curve_edge) - last(edge)) < tol ||
-           norm(last(curve_edge) - first(edge)) < tol
+        if norm(first(curve_edge) - first(edge)) < TOL ||
+           norm(last(curve_edge) - last(edge)) < TOL ||
+           norm(first(curve_edge) - last(edge)) < TOL ||
+           norm(last(curve_edge) - first(edge)) < TOL
             return true
         end
     end
     false
 end
 
+"""
+Groups edges into curves of points by stitching them together at the ends if
+possible. Can generate multiple curves if segments cannot be joined.
+"""
 function split_edges(edges::Vector{Edge})
     curves = Vector{Vector{gp.Point2D}}() # each inner vector is a vector of points that define a curve
     _edge = first(edges)
-    push!(curves, [_edge.p1, _edge.p2]) # initialize
+    push!(curves, [_edge.p1, _edge.p2]) # initialize first seed
     edge_idxs = collect(2:length(edges)) #  edges left to group
 
     while !isempty(edge_idxs)
@@ -49,19 +60,19 @@ function split_edges(edges::Vector{Edge})
         for (i, e_idx) in enumerate(edge_idxs)
             edge = edges[e_idx]
             for (c_idx, curve) in enumerate(curves)
-                if norm(last(curve) - first(edge)) < tol
+                if norm(last(curve) - first(edge)) < TOL # from global tolerance
                     curves[c_idx] = [curve; last(edge)]
                     used_edge_idx = i
                     break
-                elseif norm(last(curve) - last(edge)) < tol
+                elseif norm(last(curve) - last(edge)) < TOL
                     curves[c_idx] = [curve; first(edge)]
                     used_edge_idx = i
                     break
-                elseif norm(first(curve) - last(edge)) < tol
+                elseif norm(first(curve) - last(edge)) < TOL
                     curves[c_idx] = [first(edge); curve]
                     used_edge_idx = i
                     break
-                elseif norm(first(curve) - first(edge)) < tol
+                elseif norm(first(curve) - first(edge)) < TOL
                     curves[c_idx] = [last(edge); curve]
                     used_edge_idx = i
                     break
@@ -69,7 +80,7 @@ function split_edges(edges::Vector{Edge})
             end
             used_edge_idx != 0 && break
         end
-        if used_edge_idx == 0
+        if used_edge_idx == 0 # could not join anything, create another seed
             i = first(edge_idxs)
             push!(curves, [edges[i].p1, edges[i].p2])
             deleteat!(edge_idxs, 1)
@@ -80,8 +91,15 @@ function split_edges(edges::Vector{Edge})
     curves
 end
 
-above_isovalue(x, i, bins) = x >= bins[i]
+"""
+Is weight `w` bigger than the bin at index `i` in  `bins`.
+"""
+above_isovalue(w, i, bins) = w >= bins[i]
 
+"""
+Use Delaunay triangles to draw contours based on input data `scaled_coords`. The
+`weights` are assigned to `bins` which are composed of n-`levels`. 
+"""
 function contour_triangle(scaled_coords, bins, weights, levels)
     tess = vd.DelaunayTessellation()
     vd.sizehint!(tess, length(scaled_coords))
@@ -110,6 +128,7 @@ function contour_triangle(scaled_coords, bins, weights, levels)
     end
 
     level_edges = Dict{Int64,Vector{Edge}}()
+    
     for triangle in tess
         for level = 1:levels
             a = gp.geta(triangle)
@@ -149,4 +168,7 @@ function contour_triangle(scaled_coords, bins, weights, levels)
     level_edges
 end
 
-is_closed(curve) = norm(first(curve) - last(curve)) < tol
+"""
+Determine if a `curve` is closed, i.e. its ends join.
+"""
+is_closed(curve) = norm(first(curve) - last(curve)) < TOL
