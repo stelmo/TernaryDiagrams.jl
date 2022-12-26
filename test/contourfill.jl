@@ -1,17 +1,5 @@
-using Revise
 using CairoMakie
-using ColorSchemes
 using TernaryDiagrams
-const td = TernaryDiagrams
-import GeometricalPredicates, VoronoiDelaunay, LinearAlgebra, Interpolations
-const vd = VoronoiDelaunay
-const gp = GeometricalPredicates
-using JLD2
-
-a1 = load("test/data.jld2", "a1")
-a2 = load("test/data.jld2", "a2")
-a3 = load("test/data.jld2", "a3")
-ws = Float64.(load("test/data.jld2", "mus"))
 
 fig = Figure();
 ax = Axis(fig[1, 1]);
@@ -22,6 +10,4 @@ ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax)
 fig
 
-using FileIO
-
-FileIO.save("fig.pdf", fig)
+Makie.FileIO.save("figs/axis.svg", fig)

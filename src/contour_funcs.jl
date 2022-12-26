@@ -1,22 +1,28 @@
-"""
-Represents an edge which is two points.
-"""
-struct Edge
-    p1::gp.Point2D
-    p2::gp.Point2D
-end
-Base.first(edge::Edge) = edge.p1
-Base.last(edge::Edge) = edge.p2
+#=
+Various functions used by the contour and contourf functions to draw the isolines and isobands.
+=#
 
 """
-Represents the orientation of a point. Used to indicate in which direction the
-larger weight lies.
+Represents an straight line edge by two points.
+"""
+struct Edge
+    a::gp.Point2D
+    b::gp.Point2D
+end
+Base.first(edge::Edge) = edge.a
+Base.last(edge::Edge) = edge.b
+
+"""
+Represents the orientation of a `point` by indicating the position of the `low`
+and `high` weight used to construct the edge associated with the point.
 """
 struct PointDirection
-    p::gp.Point2D
+    point::gp.Point2D
     low::gp.Point2D
     high::gp.Point2D
 end
+
+const Curve = Vector{gp.Point2D} # a curve is a collection of points
 
 """
 Generate coordinates along the edges of the triangle. Interpolates weights based
@@ -63,9 +69,9 @@ Groups edges into curves of points by stitching them together at the ends if
 possible. Can generate multiple curves if segments cannot be joined.
 """
 function split_edges(edges::Vector{Edge})
-    curves = Vector{Vector{gp.Point2D}}() # each inner vector is a vector of points that define a curve
+    curves = Vector{Curve}() # each inner vector is a vector of points that define a curve
     _edge = first(edges)
-    push!(curves, [_edge.p1, _edge.p2]) # initialize first seed
+    push!(curves, [_edge.a, _edge.b]) # initialize first seed
     edge_idxs = collect(2:length(edges)) #  edges left to group
 
     while !isempty(edge_idxs)
@@ -95,7 +101,7 @@ function split_edges(edges::Vector{Edge})
         end
         if used_edge_idx == 0 # could not join anything, create another seed
             i = first(edge_idxs)
-            push!(curves, [edges[i].p1, edges[i].p2])
+            push!(curves, [edges[i].a, edges[i].b])
             deleteat!(edge_idxs, 1)
         else
             deleteat!(edge_idxs, used_edge_idx)
@@ -171,14 +177,39 @@ function contour_triangle(scaled_coords, bins, weights, levels)
 
             if isnothing(p_ab) && !isnothing(p_ac) && !isnothing(p_bc)
                 push!(get!(level_edges, level, Vector{Edge}()), Edge(p_ac, p_bc))
+                push!(
+                    orientation_points,
+                    PointDirection(p_ac, (a_above ? (c, a) : (a, c))...),
+                )
+                push!(
+                    orientation_points,
+                    PointDirection(p_bc, (b_above ? (c, b) : (b, c))...),
+                )
             elseif isnothing(p_ac) && !isnothing(p_ab) && !isnothing(p_bc)
                 push!(get!(level_edges, level, Vector{Edge}()), Edge(p_ab, p_bc))
+                push!(
+                    orientation_points,
+                    PointDirection(p_ab, (a_above ? (b, a) : (a, b))...),
+                )
+                push!(
+                    orientation_points,
+                    PointDirection(p_bc, (b_above ? (c, b) : (b, c))...),
+                )
             elseif isnothing(p_bc) && !isnothing(p_ac) && !isnothing(p_ab)
                 push!(get!(level_edges, level, Vector{Edge}()), Edge(p_ac, p_ab))
+                push!(
+                    orientation_points,
+                    PointDirection(p_ac, (a_above ? (c, a) : (a, c))...),
+                )
+                push!(
+                    orientation_points,
+                    PointDirection(p_ab, (b_above ? (a, b) : (b, a))...),
+                )
             end
         end
     end
-    level_edges
+
+    level_edges, orientation_points
 end
 
 """

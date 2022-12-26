@@ -1,7 +1,7 @@
 module TernaryDiagrams
 
 using Makie, LinearAlgebra, ColorSchemes, DocStringExtensions
-import GeometricalPredicates, VoronoiDelaunay, Interpolations, Base
+import GeometricalPredicates, VoronoiDelaunay, Base
 const vd = VoronoiDelaunay
 const gp = GeometricalPredicates
 
@@ -13,14 +13,17 @@ const R = [
     1 1 1
     r1 r2 r3
 ]
-const invR = inv(R)
+const invR = inv(R) # do once
+
+# tolerance for calculations
 const TOL = 1e-6
 
+# some convenience functions 
 from_cart_to_bary(x, y) = invR * [1, x, y]
 from_bary_to_cart(a1, a2, a3) = (R*[a1, a2, a3])[2:3]
 
+# GeometricalPredicates requires coordinates to lie between (1 + eps, 2 - 2eps)
 delaunay_scale(x, y) = gp.Point2D(0.8 * x + 1.1, 0.8 * y + 1.1)
-get_xy(p) = [p._x, p._y]
 delaunay_unscale(p) = [(p._x - 1.1) / 0.8, (p._y - 1.1) / 0.8]
 delaunay_unscale(x, y) = [(x - 1.1) / 0.8, (y - 1.1) / 0.8]
 
@@ -32,6 +35,8 @@ LinearAlgebra.norm(a::gp.Point2D) = sqrt(a._x^2 + a._y^2)
 
 include("contour_funcs.jl")
 
+# plot recipes, after recipe macro, include plot function
+
 """
 TernaryAxis
 
@@ -41,7 +46,7 @@ Draw the base triangle without any data to form a barycentric axis. Use the
 ## Attributes
 $(Makie.ATTRIBUTES)
 """
-@recipe(TernaryAxis) do scene
+Makie.@recipe(TernaryAxis) do scene
     Attributes(
         labelx = "labelx",
         labely = "labely",

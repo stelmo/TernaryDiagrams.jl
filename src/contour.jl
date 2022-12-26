@@ -35,7 +35,7 @@ function Makie.plot!(tr::TernaryContour)
         weights = ws[]
     end
 
-    level_edges = contour_triangle(scaled_coords, bins, weights, tr.levels[])
+    level_edges, _ = contour_triangle(scaled_coords, bins, weights, tr.levels[])
 
     for level = 1:tr.levels[]
         for curve in split_edges(level_edges[level])

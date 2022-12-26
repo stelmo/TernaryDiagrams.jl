@@ -1,13 +1,7 @@
-using Revise
 using CairoMakie
 using ColorSchemes
 using TernaryDiagrams
-const td = TernaryDiagrams
-import GeometricalPredicates, VoronoiDelaunay, LinearAlgebra, Interpolations
-const vd = VoronoiDelaunay
-const gp = GeometricalPredicates
 using JLD2
-
 
 a1 = load("test/data.jld2", "a1")
 a2 = load("test/data.jld2", "a2")
@@ -30,14 +24,6 @@ ternarycontour!(
     pad_data = true,
 )
 
-ternaryscatter!(
-    ax,
-    a1,
-    a2,
-    a3;
-    color = [get(reverse(ColorSchemes.Spectral), w, extrema(ws)) for w in ws],
-)
-
 ternaryaxis!(ax);
 
 xlims!(ax, -0.2, 1.2)
@@ -45,6 +31,13 @@ ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax)
 fig
 
-using FileIO
+Makie.FileIO.save("figs/contour.svg", fig)
 
-FileIO.save("fig.pdf", fig)
+
+ternaryscatter!(
+    ax,
+    a1,
+    a2,
+    a3;
+    color = [get(reverse(ColorSchemes.Spectral), w, extrema(ws)) for w in ws],
+)

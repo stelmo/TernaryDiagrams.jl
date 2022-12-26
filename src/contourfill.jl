@@ -35,7 +35,8 @@ function Makie.plot!(tr::TernaryContourf)
         weights = ws[]
     end
 
-    level_edges = contour_triangle(scaled_coords, bins, weights, tr.levels[])
+    level_edges, pdirs = contour_triangle(scaled_coords, bins, weights, tr.levels[])
+    curves = Vector{Tuple{Int64,Curve}}()
 
     for level = 1:tr.levels[]
         for curve in split_edges(level_edges[level])
@@ -46,14 +47,16 @@ function Makie.plot!(tr::TernaryContourf)
                     color = get(tr.colormap[], bins[level], (lb, ub)),
                 )
             else
-                lines!(
-                    tr,
-                    [Point2f(delaunay_unscale(vertex)...) for vertex in curve],
-                    color = get(tr.colormap[], bins[level], (lb, ub)),
-                )
+                push!(curves, (level, curve))
             end
         end
     end
 
     tr
 end
+
+# lines!(
+#     tr,
+#     [Point2f(delaunay_unscale(vertex)...) for vertex in curve],
+#     color = get(tr.colormap[], bins[level], (lb, ub)),
+# )

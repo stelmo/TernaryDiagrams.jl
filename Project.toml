@@ -6,16 +6,18 @@ version = "0.1.0"
 [deps]
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 GeometricalPredicates = "fd0ad045-b25c-564e-8f9c-8ef5c5f21267"
-Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 VoronoiDelaunay = "72f80fcb-8c52-57d9-aff0-40c1a3526986"
 
 [compat]
 julia = "1"
+GeometricalPredicates = "0.4"
+VoronoiDelaunay = "0.4"
+DocStringExtensions = "0.9"
+ColorSchemes = "3"
+Makie = "0.19"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

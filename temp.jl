@@ -1,11 +1,10 @@
 using Revise
 using JLD2
-using Makie, LinearAlgebra, ColorSchemes, DocStringExtensions
-using CairoMakie
-import GeometricalPredicates, VoronoiDelaunay, Interpolations, Base, TernaryDiagrams
+using Makie, LinearAlgebra, ColorSchemes, CairoMakie
+import GeometricalPredicates, VoronoiDelaunay, Base, TernaryDiagrams
+const td = TernaryDiagrams
 const vd = VoronoiDelaunay
 const gp = GeometricalPredicates
-const td = TernaryDiagrams
 
 a1 = load("test/data.jld2", "a1")
 a2 = load("test/data.jld2", "a2")
@@ -27,23 +26,43 @@ pad_coords, pad_weights = td.generate_padded_data(data_coords, ws)
 scaled_coords = [data_coords; pad_coords]
 weights = [ws; pad_weights]
 
-level_edges = td.contour_triangle(scaled_coords, bins, weights, levels)
+level_edges, pdirs = td.contour_triangle(scaled_coords, bins, weights, levels)
 
 fig = Figure();
 ax = Axis(fig[1, 1]);
 for level = 1:levels
-    # level = 2
+    # level = 5
     curves = td.split_edges(level_edges[level])
     for curve in curves
-        if td.is_closed(curve)
-            color = :red
-        else
-            color = :black
-        end
+        td.is_closed(curve) && continue
+
+        p1 = first(curve)
+        p1_idx = argmin(norm(p1 - x.p) for x in pdirs)
+        pend = last(curve)
+        pend_idx = argmin(norm(pend - x.p) for x in pdirs)
+
+        scatter!(
+            ax,
+            [
+                Makie.Point2(td.delaunay_unscale(pdirs[idx].low)...) for
+                idx in [p1_idx, pend_idx]
+            ];
+            color = :blue,
+        )
+
+        scatter!(
+            ax,
+            [
+                Makie.Point2(td.delaunay_unscale(pdirs[idx].high)...) for
+                idx in [p1_idx, pend_idx]
+            ];
+            color = :red,
+        )
+
         lines!(
             ax,
             [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve];
-            color,
+            color = :black,
         )
     end
 end
