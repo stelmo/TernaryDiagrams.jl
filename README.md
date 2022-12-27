@@ -30,8 +30,9 @@ ternaryaxis!(
     =#
 )
 
-xlims!(ax, -0.2, 1.2) # to center the triangle
-ylims!(ax, -0.3, 1.1) # to center the triangle
+# the triangle is drawn from (0,0) to (0.5, sqrt(3)/2) to (1,0).
+xlims!(ax, -0.2, 1.2) # to center the triangle and allow space for the labels
+ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax) # to hide the axis decorations
 fig
 ```
