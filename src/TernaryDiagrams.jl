@@ -23,9 +23,12 @@ from_cart_to_bary(x, y) = invR * [1, x, y]
 from_bary_to_cart(a1, a2, a3) = (R*[a1, a2, a3])[2:3]
 
 # GeometricalPredicates requires coordinates to lie between (1 + eps, 2 - 2eps)
-delaunay_scale(x, y) = gp.Point2D(0.8 * x + 1.1, 0.8 * y + 1.1)
-delaunay_unscale(p) = [(p._x - 1.1) / 0.8, (p._y - 1.1) / 0.8]
+delaunay_scale(x, y) = [0.8 * x + 1.1, 0.8 * y + 1.1]
+delaunay_scale(p::gp.Point2D) = gp.Point2D(0.8 * p._x + 1.1, 0.8 * p._y + 1.1)
+delaunay_unscale(p::gp.Point2D) = gp.Point2D((p._x - 1.1) / 0.8, (p._y - 1.1) / 0.8)
 delaunay_unscale(x, y) = [(x - 1.1) / 0.8, (y - 1.1) / 0.8]
+
+unpack(p::gp.Point2D) = (p._x, p._y)
 
 # extend some functions to work with Point2D from GeometricalPredicates
 Base.:(-)(a::gp.Point2D, b::gp.Point2D) = gp.Point2D(a._x - b._x, a._y - b._y)

@@ -21,7 +21,7 @@ ub = maximum(ws)
 d = (ub - lb) / (levels + 1)
 bins = [(lb + n * d) for n = 1:levels]
 
-data_coords = td.delaunay_scale.(xs, ys)
+data_coords = td.delaunay_scale.([gp.Point2D(x,y) for (x,y) in zip(xs, ys)])
 pad_coords, pad_weights = td.generate_padded_data(data_coords, ws)
 _scaled_coords = [data_coords; pad_coords]
 _weights = [ws; pad_weights]
@@ -39,7 +39,7 @@ for level = 1:levels
         if td.is_closed(curve)
             lines!(
                 ax,
-                [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve];
+                [Makie.Point2(td.unpack(td.delaunay_unscale(vertex))...) for vertex in curve];
                 color = :green,
             )
         else
@@ -51,7 +51,7 @@ for level = 1:levels
             scatter!(
                 ax,
                 [
-                    Makie.Point2(td.delaunay_unscale(point_directions[idx].low)...) for
+                    Makie.Point2(td.unpack(td.delaunay_unscale(point_directions[idx].low))...) for
                     idx in [p1_idx, pend_idx]
                 ];
                 color = :blue,
@@ -60,7 +60,7 @@ for level = 1:levels
             scatter!(
                 ax,
                 [
-                    Makie.Point2(td.delaunay_unscale(point_directions[idx].high)...) for
+                    Makie.Point2(td.unpack(td.delaunay_unscale(point_directions[idx].high))...) for
                     idx in [p1_idx, pend_idx]
                 ];
                 color = :red,
@@ -68,7 +68,7 @@ for level = 1:levels
 
             lines!(
                 ax,
-                [Makie.Point2(td.delaunay_unscale(vertex)...) for vertex in curve];
+                [Makie.Point2(td.unpack(td.delaunay_unscale(vertex))...) for vertex in curve];
                 color = :black,
             )
         end
@@ -84,12 +84,32 @@ for level in 1:levels
         if td.is_closed(curve)
             push!(get!(level_closed_curves, level, Vector{td.Curve}()), curve)
         else
-            push!(get!(level_open_curves, level, Vector{td.Curve}()), curve)
+            # ensure that open curves touch the nearest edge.
+            p1 = td.to_edge(first(curve))
+            pend = td.to_edge(last(curve))
+            if norm(p1 - first(curve)) < td.TOL && norm(pend - last(curve)) < td.TOL
+                fixed_curve = curve
+            elseif norm(p1 - first(curve)) < td.TOL && norm(pend - last(curve)) >= td.TOL
+                fixed_curve = [curve; pend]
+            elseif norm(pend - last(curve)) >= td.TOL && norm(pend - last(curve)) < td.TOL
+                fixed_curve = [p1; curve]
+            else
+                fixed_curve = [p1; curve; pend]
+            end
+            push!(get!(level_open_curves, level, Vector{td.Curve}()), fixed_curve)
         end
     end
 end
 
+
+
 td.ternaryaxis!(ax)
 fig
+
+c = level_open_curves[8][1]
+
+td.to_edge(first(c))
+
+
 
 Makie.FileIO.save("fig.pdf", fig)

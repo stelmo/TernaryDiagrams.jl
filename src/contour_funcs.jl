@@ -31,7 +31,7 @@ on nearest known weight.
 function generate_padded_data(data_coords, ws)
     pad_space = 0.05
     pad_coords = [
-        delaunay_scale(from_bary_to_cart(a1, a2, 1.0 - a1 - a2)...) for a1 = 0:pad_space:1 for
+        gp.Point2D(delaunay_scale(from_bary_to_cart(a1, a2, 1.0 - a1 - a2)...)...) for a1 = 0:pad_space:1 for
         a2 = 0:pad_space:1 if 1.0 - a1 - a2 >= 0
     ]
     pad_weights = Float64[]
@@ -248,35 +248,42 @@ Shift so that can be added up
 """
 angle(y, x) = atan(y, x) < 0 ? 2π + atan(y, x) : atan(y, x)
 
-
 """
-Get distance from line `a * y + b * x + c = 0` to point `(x0, y0)`.
+Get distance from line `a * x + b * y + c = 0` to point `(x0, y0)`.
 """
-dist_line_point(a, b, c, x0, y0) = begin
+function dist_line_point(a, b, c, x0, y0)
     abs(a * x0 + b * y0 + c)/sqrt(a^2 + b^2)
 end
 
+dist_line_point(a, b, c, p::gp.Point2D) = dist_line_point(a, b, c, p._x, p._y)
+
 """
-Get coordinates of nearest point on the line `a * y + b * x + c = 0` to point `(x0, y0)`.
+Get coordinates of nearest point on the line `a * x + b * y + c = 0` to point `(x0, y0)`.
 """
-nearest_line_point(a, b, c, x0, y0) = begin
+function nearest_line_point(a, b, c, x0, y0)
     x = (b * (b * x0 - a * y0) - a * c)/(a^2 + b^2)
     y = (a * (-b * x0 + a * y0) - b * c)/(a^2 + b^2)
-    (x, y)
+    gp.Point2D(x, y)
 end
 
+nearest_line_point(a, b, c, p::gp.Point2D) = nearest_line_point(a, b, c, p._x, p._y)
+
 """
-Get the coordinates on the nearest edge of the triangle to `p`. 
+Get the coordinates on the nearest edge of the triangle to `p`. Note, the lines
+are defined relative to the unscaled coordinate system, hence the unscale/scale
+operations inside the function. Required and returns scaled coordinates!
 """
-to_edge(p) = begin
+function to_edge(_p::gp.Point2D)
+    p = delaunay_unscale(_p)
     dist_from_bottom = p._y # straight down
-    dist_from_left_edge = dist_line_point(1.0, -sqrt(3), 0.0, p._x, p._y) # left edge
+    dist_from_left_edge = dist_line_point(-sqrt(3), 1.0, 0.0, p) # left edge
+    dist_from_right_edge = dist_line_point(sqrt(3), 1.0, -sqrt(3), p) # right edge
 
     if dist_from_bottom < dist_from_left_edge && dist_from_bottom < dist_from_right_edge # closest to bottom
-        return (p._x, 0.0)
+        return delaunay_scale(gp.Point2D(p._x, 0.0))
     elseif dist_from_left_edge < dist_from_bottom && dist_from_left_edge < dist_from_right_edge # closest to left edge 
-        return nearest_line_point(1.0, -sqrt(3), 0.0, p._x, p._y)
+        return delaunay_scale(nearest_line_point(-sqrt(3), 1.0, 0.0, p))
     else # must be closest to right edge if not other two options
-        return nearest_line_point(1.0, sqrt(3), -sqrt(3), p._x, p._y)
+        return delaunay_scale(nearest_line_point(sqrt(3), 1.0, -sqrt(3), p))
     end
 end

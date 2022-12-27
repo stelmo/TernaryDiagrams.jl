@@ -26,7 +26,7 @@ function Makie.plot!(tr::TernaryContourf)
     bins = [(lb + n * d) for n = 1:tr.levels[]]
 
     # always pad data to make filling easier
-    data_coords = delaunay_scale.(xs[], ys[])
+    data_coords = delaunay_scale.([gp.Point2D.(x,y) for (x,y) in zip(xs[], ys[])])
     pad_coords, pad_weights = generate_padded_data(data_coords, ws[])
     _scaled_coords = [data_coords; pad_coords]
     _weights = [ws[]; pad_weights]
