@@ -5,12 +5,12 @@
 [![repostatus-img]][repostatus-url] [![TernaryDiagrams Downloads](https://shields.io/endpoint?url=https://pkgs.genieframework.com/api/v1/badge/TernaryDiagrams)](https://pkgs.genieframework.com?packages=TernaryDiagrams)
 
 This package exports a few [Makie](https://github.com/MakieOrg/Makie.jl) recipes
-that can be used to construct [ternary
-plots](https://en.wikipedia.org/wiki/Ternary_plot). 
+that can be used to construct a (relatively quick and dirty) [ternary
+plot](https://en.wikipedia.org/wiki/Ternary_plot). 
 
-In all the examples that follow, assume that `a1[i] + a2[i] + a3[i] = 1`. If
+In all the examples that follow, it is assumed that `a1[i] + a2[i] + a3[i] = 1`. If
 applicable, `w[i]` corresponds to the weight associated with the point `(a1[i],
-a2[i], a3[i])`.
+a2[i], a3[i])` for each index `i` in the dataset.
 
 ## The ternary axis
 ```julia
@@ -22,12 +22,17 @@ ternaryaxis!(
     labelx = "a1",
     labely = "a2",
     labelz = "a3",
-    # more options available, check out attributes with ?ternaryaxis
+    # more options available, check out attributes with ?ternaryaxis (same for other plot functions)
+    #= Note 
+    Depending on the length of the axis labels, they may seem unaligned. 
+    Use the kwarg arrow_label_rotation_adjustment to rotate them slightly. 
+    For longer labels, use a value closer to 1 (trial and error it).
+    =#
 )
 
 xlims!(ax, -0.2, 1.2) # to center the triangle
 ylims!(ax, -0.3, 1.1) # to center the triangle
-hidedecorations!(ax) # to hide the axis decos
+hidedecorations!(ax) # to hide the axis decorations
 fig
 ```
 <br>
@@ -95,7 +100,7 @@ ternarycontour!(
     a3,
     ws;
     levels = 5,
-    linewidth = 1,
+    linewidth = 4,
     color = nothing,
     colormap = reverse(ColorSchemes.Spectral),
     pad_data = true,
@@ -115,6 +120,22 @@ fig
 </br>
 
 ## Ternary filled contours
+Note: `ternarycontour` uses a different Delaunay triangulation scheme to
+`ternarycontourf` (the former is made by me, while the latter essentially calls
+[`tricontourf`](https://docs.makie.org/v0.19.0/examples/plotting_functions/tricontourf/)
+from Makie internally).
 ```julia
-
+fig = Figure();
+ax = Axis(fig[1, 1]);
+ternarycontourf!(ax, a1, a2, a3, ws; levels = 10)
+ternaryaxis!(ax);
+xlims!(ax, -0.2, 1.2)
+ylims!(ax, -0.3, 1.1)
+hidedecorations!(ax)
+fig
 ```
+<br>
+<div align="center">
+    <img src="figs/contourfill.svg?maxAge=0" width="80%">
+</div>
+</br>

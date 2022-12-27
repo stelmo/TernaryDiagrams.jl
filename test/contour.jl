@@ -18,7 +18,7 @@ ternarycontour!(
     a3,
     ws;
     levels = 5,
-    linewidth = 1,
+    linewidth = 4,
     color = nothing,
     colormap = reverse(ColorSchemes.Spectral),
     pad_data = true,
@@ -32,12 +32,3 @@ hidedecorations!(ax)
 fig
 
 Makie.FileIO.save("figs/contour.svg", fig)
-
-
-ternaryscatter!(
-    ax,
-    a1,
-    a2,
-    a3;
-    color = [get(reverse(ColorSchemes.Spectral), w, extrema(ws)) for w in ws],
-)

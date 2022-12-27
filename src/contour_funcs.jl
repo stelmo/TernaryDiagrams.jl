@@ -31,20 +31,20 @@ on nearest known weight.
 function generate_padded_data(data_coords, ws)
     pad_space = 0.05
     pad_coords = [
-        gp.Point2D(delaunay_scale(from_bary_to_cart(a1, a2, 1.0 - a1 - a2)...)...) for a1 = 0:pad_space:1 for
-        a2 = 0:pad_space:1 if 1.0 - a1 - a2 >= 0
+        gp.Point2D(delaunay_scale(from_bary_to_cart(a1, a2, 1.0 - a1 - a2)...)...) for
+        a1 = 0:pad_space:1 for a2 = 0:pad_space:1 if 1.0 - a1 - a2 >= 0
     ]
     pad_weights = Float64[]
 
     for p in pad_coords # TODO use nearest neighbor interpolant instead
         ds = [norm(p - x) for x in data_coords]
-        idxs = sortperm(ds)[1:15] # this can be optimized
-        dtot = sum(ds[idxs])
-        w = sum(ws[idx] * ds[idx] / dtot for idx in idxs)
-        push!(pad_weights, w)
+        # idxs = sortperm(ds)[1:15] # this can be optimized
+        # dtot = sum(ds[idxs])
+        # w = sum(ws[idx] * ds[idx] / dtot for idx in idxs)
+        # push!(pad_weights, w)
 
-        # idx = argmin(ds)
-        # push!(pad_weights, ws[idx])
+        idx = argmin(ds)
+        push!(pad_weights, ws[idx])
     end
 
     pad_coords, pad_weights
@@ -231,59 +231,4 @@ function rem_repeats(coords, weights)
     end
 
     return u_coords, u_weights
-end
-
-"""
-Determine if a `curve` is closed, i.e. its ends join.
-"""
-is_closed(curve::Curve) = norm(first(curve) - last(curve)) < TOL
-
-"""
-Return true if curve `c1` is totally contained in curve `c2`.
-"""
-is_curve_contained(c1::Curve, c2::Curve) = all(abs(2π - sum(angle(p2._y - p1._y, p2._x - p1._x) for p2 in c2) < TOL) for p2 in c1)
-
-"""
-Shift so that can be added up
-"""
-angle(y, x) = atan(y, x) < 0 ? 2π + atan(y, x) : atan(y, x)
-
-"""
-Get distance from line `a * x + b * y + c = 0` to point `(x0, y0)`.
-"""
-function dist_line_point(a, b, c, x0, y0)
-    abs(a * x0 + b * y0 + c)/sqrt(a^2 + b^2)
-end
-
-dist_line_point(a, b, c, p::gp.Point2D) = dist_line_point(a, b, c, p._x, p._y)
-
-"""
-Get coordinates of nearest point on the line `a * x + b * y + c = 0` to point `(x0, y0)`.
-"""
-function nearest_line_point(a, b, c, x0, y0)
-    x = (b * (b * x0 - a * y0) - a * c)/(a^2 + b^2)
-    y = (a * (-b * x0 + a * y0) - b * c)/(a^2 + b^2)
-    gp.Point2D(x, y)
-end
-
-nearest_line_point(a, b, c, p::gp.Point2D) = nearest_line_point(a, b, c, p._x, p._y)
-
-"""
-Get the coordinates on the nearest edge of the triangle to `p`. Note, the lines
-are defined relative to the unscaled coordinate system, hence the unscale/scale
-operations inside the function. Required and returns scaled coordinates!
-"""
-function to_edge(_p::gp.Point2D)
-    p = delaunay_unscale(_p)
-    dist_from_bottom = p._y # straight down
-    dist_from_left_edge = dist_line_point(-sqrt(3), 1.0, 0.0, p) # left edge
-    dist_from_right_edge = dist_line_point(sqrt(3), 1.0, -sqrt(3), p) # right edge
-
-    if dist_from_bottom < dist_from_left_edge && dist_from_bottom < dist_from_right_edge # closest to bottom
-        return delaunay_scale(gp.Point2D(p._x, 0.0))
-    elseif dist_from_left_edge < dist_from_bottom && dist_from_left_edge < dist_from_right_edge # closest to left edge 
-        return delaunay_scale(nearest_line_point(-sqrt(3), 1.0, 0.0, p))
-    else # must be closest to right edge if not other two options
-        return delaunay_scale(nearest_line_point(sqrt(3), 1.0, -sqrt(3), p))
-    end
 end

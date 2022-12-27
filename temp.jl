@@ -21,7 +21,7 @@ ub = maximum(ws)
 d = (ub - lb) / (levels + 1)
 bins = [(lb + n * d) for n = 1:levels]
 
-data_coords = td.delaunay_scale.([gp.Point2D(x,y) for (x,y) in zip(xs, ys)])
+data_coords = td.delaunay_scale.([gp.Point2D(x, y) for (x, y) in zip(xs, ys)])
 pad_coords, pad_weights = td.generate_padded_data(data_coords, ws)
 _scaled_coords = [data_coords; pad_coords]
 _weights = [ws; pad_weights]
@@ -39,7 +39,10 @@ for level = 1:levels
         if td.is_closed(curve)
             lines!(
                 ax,
-                [Makie.Point2(td.unpack(td.delaunay_unscale(vertex))...) for vertex in curve];
+                [
+                    Makie.Point2(td.unpack(td.delaunay_unscale(vertex))...) for
+                    vertex in curve
+                ];
                 color = :green,
             )
         else
@@ -47,12 +50,13 @@ for level = 1:levels
             p1_idx = argmin(norm(p1 - x.point) for x in point_directions)
             pend = last(curve)
             pend_idx = argmin(norm(pend - x.point) for x in point_directions)
-            
+
             scatter!(
                 ax,
                 [
-                    Makie.Point2(td.unpack(td.delaunay_unscale(point_directions[idx].low))...) for
-                    idx in [p1_idx, pend_idx]
+                    Makie.Point2(
+                        td.unpack(td.delaunay_unscale(point_directions[idx].low))...,
+                    ) for idx in [p1_idx, pend_idx]
                 ];
                 color = :blue,
             )
@@ -60,15 +64,19 @@ for level = 1:levels
             scatter!(
                 ax,
                 [
-                    Makie.Point2(td.unpack(td.delaunay_unscale(point_directions[idx].high))...) for
-                    idx in [p1_idx, pend_idx]
+                    Makie.Point2(
+                        td.unpack(td.delaunay_unscale(point_directions[idx].high))...,
+                    ) for idx in [p1_idx, pend_idx]
                 ];
                 color = :red,
             )
 
             lines!(
                 ax,
-                [Makie.Point2(td.unpack(td.delaunay_unscale(vertex))...) for vertex in curve];
+                [
+                    Makie.Point2(td.unpack(td.delaunay_unscale(vertex))...) for
+                    vertex in curve
+                ];
                 color = :black,
             )
         end
@@ -76,10 +84,10 @@ for level = 1:levels
 end
 fig
 
-level_open_curves = Dict{Int64, Vector{td.Curve}}()
-level_closed_curves = Dict{Int64, Vector{td.Curve}}()
+level_open_curves = Dict{Int64,Vector{td.Curve}}()
+level_closed_curves = Dict{Int64,Vector{td.Curve}}()
 
-for level in 1:levels
+for level = 1:levels
     for curve in td.split_edges(level_edges[level])
         if td.is_closed(curve)
             push!(get!(level_closed_curves, level, Vector{td.Curve}()), curve)

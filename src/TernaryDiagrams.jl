@@ -148,12 +148,7 @@ data is interpolated based on the nearest data point.
 $(Makie.ATTRIBUTES)
 """
 @recipe(TernaryContourf, x, y, z, w) do scene
-    Attributes(
-        colormap = reverse(ColorSchemes.Spectral),
-        levels = 5,
-        clip_min_w = -Inf,
-        clip_max_w = Inf,
-    )
+    Attributes(colormap = :Spectral, levels = 5)
 end
 
 include("contourfill.jl")
