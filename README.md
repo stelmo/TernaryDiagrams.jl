@@ -140,3 +140,9 @@ fig
     <img src="figs/contourfill.svg?maxAge=0" width="80%">
 </div>
 </br>
+
+## Long term plans
+If you use this package and run into issues, please let me know! I am planning
+on extending the package to make a ternary plot axis instead of co-opting the
+regular 2D axis. Before that stage though, I would like to sort out any bugs I
+currently have implemented. So let me know what you think!
