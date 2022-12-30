@@ -8,9 +8,12 @@ This package exports a few [Makie](https://github.com/MakieOrg/Makie.jl) recipes
 that can be used to construct a (relatively quick and dirty) [ternary
 plot](https://en.wikipedia.org/wiki/Ternary_plot). 
 
-In all the examples that follow, it is assumed that `a1[i] + a2[i] + a3[i] = 1`. If
-applicable, `w[i]` corresponds to the weight associated with the point `(a1[i],
-a2[i], a3[i])` for each index `i` in the dataset.
+In all the examples that follow, it is assumed that `a1[i] + a2[i] + a3[i] = 1`.
+If applicable, `w[i]` corresponds to the weight associated with the point
+`(a1[i], a2[i], a3[i])` for each index `i` in the dataset. If you would like to
+load a test dataset, use `test/data.jld2`, which can be opened with
+[JLD2.jl](https://github.com/JuliaIO/JLD2.jl). The file contains `a1`, `a2`,
+`a3` and `mus`, with the latter being weights associated with the data points.
 
 ## The ternary axis
 ```julia
