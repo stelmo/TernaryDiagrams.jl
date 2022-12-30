@@ -14,6 +14,7 @@ If applicable, `w[i]` corresponds to the weight associated with the point
 load a test dataset, use `test/data.jld2`, which can be opened with
 [JLD2.jl](https://github.com/JuliaIO/JLD2.jl). The file contains `a1`, `a2`,
 `a3` and `mus`, with the latter being weights associated with the data points.
+See the file `temp.jl` for an example of its usage.
 
 ## The ternary axis
 ```julia
