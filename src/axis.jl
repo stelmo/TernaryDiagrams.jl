@@ -113,7 +113,7 @@ function draw_grid!(tr::TernaryAxis)
         text!(
             tr,
             x1,
-            text = "  " * string(round(f1, digits = 2)),
+            text = @lift($(tr.xtickformat)(f1)),
             fontsize = tr.tick_fontsize[],
             rotation = -π / 3,
             align = (:left, :center),
@@ -135,7 +135,7 @@ function draw_grid!(tr::TernaryAxis)
         text!(
             tr,
             x1,
-            text = "  " * string(round(f2, digits = 2)),
+            text = @lift($(tr.ytickformat)(f2)),
             fontsize = tr.tick_fontsize[],
             rotation = π / 3,
             align = (:left, :center),
@@ -157,7 +157,7 @@ function draw_grid!(tr::TernaryAxis)
         text!(
             tr,
             x1,
-            text = string(round(f1, digits = 2)) * "  ",
+            text = @lift($(tr.ztickformat)(f1)),
             fontsize = tr.tick_fontsize[],
             align = (:right, :center),
         )

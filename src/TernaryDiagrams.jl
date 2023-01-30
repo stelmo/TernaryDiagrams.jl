@@ -40,6 +40,8 @@ include("contour_funcs.jl")
 
 # plot recipes, after recipe macro, include plot function
 
+_default_formatter = tick -> "  " * string(round(tick, digits = 2))
+
 """
 TernaryAxis
 
@@ -64,6 +66,9 @@ Makie.@recipe(TernaryAxis) do scene
         tick_fontsize = 8,
         grid_line_color = :grey,
         grid_line_width = 0.5,
+        xtickformat = _default_formatter,
+        ytickformat = _default_formatter,
+        ztickformat = _default_formatter,
     )
 end
 
