@@ -19,7 +19,7 @@ See the file `temp.jl` for an example of its usage.
 ## The ternary axis
 ```julia
 fig = Figure();
-ax = Axis(fig[1, 1]);
+ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71));
 
 ternaryaxis!(
     ax; 
@@ -49,7 +49,7 @@ fig
 ## Ternary lines
 ```julia
 fig = Figure();
-ax = Axis(fig[1, 1]);
+ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71));
 
 ternaryaxis!(ax);
 ternarylines!(ax, a1, a2, a3; color = :blue)
@@ -69,7 +69,7 @@ fig
 ```julia
 
 fig = Figure();
-ax = Axis(fig[1, 1]);
+ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71)));
 
 ternaryaxis!(ax);
 ternaryscatter!(
@@ -96,7 +96,7 @@ fig
 ## Ternary contours
 ```julia
 fig = Figure();
-ax = Axis(fig[1, 1]);
+ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71)));
 
 ternarycontour!(
     ax,
@@ -131,7 +131,7 @@ Note: `ternarycontour` uses a different Delaunay triangulation scheme to
 from Makie internally).
 ```julia
 fig = Figure();
-ax = Axis(fig[1, 1]);
+ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71)));
 ternarycontourf!(ax, a1, a2, a3, ws; levels = 10)
 ternaryaxis!(ax);
 xlims!(ax, -0.2, 1.2)
