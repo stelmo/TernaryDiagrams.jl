@@ -40,7 +40,23 @@ include("contour_funcs.jl")
 
 # plot recipes, after recipe macro, include plot function
 
-_default_formatter = tick -> "  " * string(round(tick, digits = 2))
+_default_formatter = tick -> ("  ",) .* string.(round.(tick, digits = 2))
+
+using Makie: inherit, automatic
+
+function Makie.inherit(scene, attrs::Tuple, default)
+    next_val::Any = scene.theme
+    for attr in attrs
+        if next_val isa Attributes && haskey(next_val, attr)
+            next_val = next_val[attr]
+        else
+            return default
+        end
+    end
+    return next_val
+end
+Makie.inherit(::Nothing, attrs::Tuple, default) = default
+
 
 """
 TernaryAxis
@@ -53,22 +69,103 @@ $(Makie.ATTRIBUTES)
 """
 Makie.@recipe(TernaryAxis) do scene
     Attributes(
-        labelx = "labelx",
-        labely = "labely",
-        labelz = "labelz",
+        xlabel = "labelx",
+        ylabel = "labely",
+        zlabel = "labelz",
         label_fontsize = 18,
         label_vertex_vertical_adjustment = 0.05,
         label_edge_vertical_adjustment = 0.10,
-        label_edge_vertical_arrow_adjustment = 0.08,
+        label_edge_vertical_arrow_adjustment = 0.08,#to_value(get(default_theme(scene), :fontsize, 12f0)),
         arrow_scale = 0.4,
         arrow_label_rotation_adjustment = 0.85,
-        arrow_label_fontsize = 16,
-        tick_fontsize = 8,
+        arrow_label_fontsize = 14,
+        tick_fontsize = 10,
         grid_line_color = :grey,
         grid_line_width = 0.5,
+
+        xticks = 0.1:0.2:0.9,
         xtickformat = _default_formatter,
+        xticksize = inherit(scene, (:Axis, :xticksize), 5f0),
+        xtickalign = 1f0,
+        xtickcolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        xtickwidth = 1f0,
+        xtickvisible = true,
+        xticklabelsize = inherit(scene, :fontsize, 16),
+        xticklabelfont = inherit(scene, :font, :regular),
+        xticklabelcolor = inherit(scene, :textcolor, :black),
+        xticklabelrotation = -π/3,
+        xticklabelpad = 5f0,
+        xticklabelalign = (:left, :center),
+        xticklabelvisible = true,
+        xgridcolor = inherit(scene, (:Axis, :xgridcolor), RGBAf(0, 0, 0, 0.12)),
+        xgridstyle = :solid,
+        xgridwidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        xgridvisible = true,
+        xminorticks = Makie.IntervalsBetween(2),
+        xminorgridstyle = :solid,
+        xminorgridwidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        xminorgridcolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        xminorgridvisible = true,
+        xspinestyle = :solid,
+        xspinewidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        xspinecolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        xspinevisible = true,
+
+        yticks = 0.1:0.2:0.9,
         ytickformat = _default_formatter,
+        yticksize = inherit(scene, (:Axis, :xticksize), 5f0),
+        ytickalign = 1f0,
+        ytickcolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        ytickwidth = 1f0,
+        ytickvisible = true,
+        yticklabelsize = inherit(scene, :fontsize, 16),
+        yticklabelfont = inherit(scene, :font, :regular),
+        yticklabelcolor = inherit(scene, :textcolor, :black),
+        yticklabelrotation = π/3,
+        yticklabelpad = 5f0,
+        yticklabelalign = (:left, :center),
+        yticklabelvisible = true,
+        ygridcolor = inherit(scene, (:Axis, :xgridcolor), RGBAf(0, 0, 0, 0.12)),
+        ygridstyle = :solid,
+        ygridwidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        ygridvisible = true,
+        yminorticks = Makie.IntervalsBetween(2),
+        yminorgridstyle = :solid,
+        yminorgridwidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        yminorgridcolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        yminorgridvisible = true,
+        yspinestyle = :solid,
+        yspinewidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        yspinecolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        yspinevisible = true,
+
+        zticks = 0.1:0.2:0.9,
         ztickformat = _default_formatter,
+        zticksize = inherit(scene, (:Axis, :xticksize), 5f0),
+        ztickalign = 1f0,
+        ztickcolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        ztickwidth = 1f0,
+        ztickvisible = true,
+        zticklabelsize = inherit(scene, :fontsize, 16),
+        zticklabelfont = inherit(scene, :font, :regular),
+        zticklabelcolor = inherit(scene, :textcolor, :black),
+        zticklabelrotation = 0e0,
+        zticklabelpad = 5f0,
+        zticklabelalign = (:right, :center),
+        zticklabelvisible = true,
+        zgridcolor = inherit(scene, (:Axis, :xgridcolor), RGBAf(0, 0, 0, 0.12)),
+        zgridstyle = :solid,
+        zgridwidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        zgridvisible = true,
+        zminorticks = Makie.IntervalsBetween(2),
+        zminorgridstyle = :solid,
+        zminorgridwidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        zminorgridcolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        zminorgridvisible = true,
+        zspinestyle = :solid,
+        zspinewidth = inherit(scene, (:Axis, :xgridwidth), 1),
+        zspinecolor = inherit(scene, (:Axis, :xgridcolor), :black),
+        zspinevisible = true,
     )
 end
 
