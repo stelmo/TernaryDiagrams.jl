@@ -67,7 +67,7 @@ Makie.data_limits(pl::Bracket) = mapreduce(union, pl[1][]) do points
     Rect3f([points...])
 end
 
-triangle_gridline(f1, dim::Int) = point_on_axis(f1, Val(dim))
+triangle_gridline(f1, dim::Int) = triangle_gridline(f1, Val(dim))
 
 function triangle_gridline(f1, ::Val{Dim}) where Dim
     f2 = 1 - f1
@@ -91,6 +91,10 @@ dimsym(sym, ::Val{1}) = Symbol(:x, sym)
 dimsym(sym, ::Val{2}) = Symbol(:y, sym)
 dimsym(sym, ::Val{3}) = Symbol(:z, sym)
 
+triangle_arrow_scalevec(::Val{1}) = -Point2f(r2)
+triangle_arrow_scalevec(::Val{2}) = -Point2f(r3 .- r2)
+triangle_arrow_scalevec(::Val{3}) = Point2f(r3)
+
 function draw_dim_axis!(tr::TernaryAxis, dim::Val{Dim}) where Dim
 
     # set up observables
@@ -110,7 +114,8 @@ function draw_dim_axis!(tr::TernaryAxis, dim::Val{Dim}) where Dim
         
         gridline_points = triangle_gridline.(_tickvals, dim)
         gridpoints.val = vcat(gridline_points...)
-        ticklabelpositions.val = first.(gridline_points)
+        origin_points = first.(gridline_points)
+        ticklabelpositions.val = Point2f.(sincos.(atan.((p -> p[2]/p[1]).((last.(gridline_points) .- origin_points))))) .* 0.025 .* (Dim == 1 ? -1 : 1) .+ origin_points
 
         notify(tickvals); notify(ticklabels); notify(ticklabelpositions); notify(gridpoints)
     end
@@ -143,7 +148,7 @@ function draw_dim_axis!(tr::TernaryAxis, dim::Val{Dim}) where Dim
 
     ticklabelplot = text!(
         tr, ticklabelpositions; 
-        text = ticklabels, fontsize = tr.tick_fontsize, rotation = tr[dimsym(:ticklabelrotation, dim)], 
+        text = ticklabels, fontsize = tr[dimsym(:ticklabelsize, dim)], rotation = tr[dimsym(:ticklabelrotation, dim)], 
         color = tr[dimsym(:ticklabelcolor, dim)], font = tr[dimsym(:ticklabelfont, dim)],
         align = tr[dimsym(:ticklabelalign, dim)]
     )
@@ -152,169 +157,35 @@ function draw_dim_axis!(tr::TernaryAxis, dim::Val{Dim}) where Dim
 
     x0, y0 = Point2f((R * circshift([0.3, 0.7, 0.0], Dim-1))[2:3])
 
-    return (spineplot, gridplot, minorgridplot, ticklabelplot)
+    labeltext_bbox = @lift(Makie.boundingbox($(ticklabelplot.plots[1][1]), fill(Point3f(0), length($(ticklabelplot.plots[1][1]))), fill(to_rotation(0), length($(ticklabelplot.plots[1][1])))))
+
+    arrowplot = bracket!(
+        tr, 
+        Point2f(x0, y0), @lift(Point2f(x0, y0) + triangle_arrow_scalevec(dim) * $(tr.arrow_scale));
+        text = tr[dimsym(:label, dim)],
+        width = @lift(maximum(widths($labeltext_bbox)) + $(tr[dimsym(:ticklabelpad, dim)])),
+        orientation = Dim == 1 ? :down : :up,
+        style = :arrow,
+        fontsize = tr.arrow_label_fontsize,
+        linestyle = :solid,
+        xautolimits = false,
+        yautolimits = false,
+        inspectable = false,
+    )
+
+    return (spineplot, gridplot, minorgridplot, ticklabelplot, arrowplot)
 
 
 end
 
 function draw_triangle_axis!(tr::TernaryAxis)
 
-    # draw grid
-    fracs = 0.0:0.1:1.0
+    # draw individual axes
 
-    # xtickvals = Observable(Vector{Real}())
-    # xticklabels = Observable(Vector{Any}())
-    # xticklabelpositions = Observable(Vector{Point2f}())
-    # xgridpoints = Observable(Vector{Point2f}())
-    # xminorgridpoints = Observable(Vector{Point2f}())
+    xspineplot, xgridplot, xminorgridplot, xticklabelplot, xarrowplot = draw_dim_axis!(tr, Val(1))
+    yspineplot, ygridplot, yminorgridplot, yticklabelplot, yarrowplot = draw_dim_axis!(tr, Val(2))
+    zspineplot, zgridplot, zminorgridplot, zticklabelplot, zarrowplot = draw_dim_axis!(tr, Val(3))
 
-    # lift(tr.xticks, identity, tr.xtickformat, 0, 1) do ticks, scale, format, vmin, vmax
-    #     empty!(xtickvals.val); empty!(xticklabels.val); empty!(xticklabelpositions.val); empty!(xgridpoints.val)
-
-    #     tickvals, ticklabels = Makie.get_ticks(ticks, scale, format, vmin, vmax)
-    #     xtickvals.val = tickvals
-    #     xticklabels.val = ticklabels
-        
-    #     gridline_points = triangle_gridline.(tickvals, Val(1))
-    #     xgridpoints.val = vcat(gridline_points...)
-    #     xticklabelpositions.val = last.(gridline_points)
-
-    #     notify(xtickvals); notify(xticklabels); notify(xticklabelpositions); notify(xgridpoints)
-    # end
-
-    # lift(xtickvals, tr.xminorticks) do tickvals, minorticks
-        
-    #     minortickvals = Makie.get_minor_tickvalues(minorticks, identity, tickvals, 0, 1)
-
-    #     xminorgridpoints[] = vcat(triangle_gridline.(minortickvals, Val(1))...)
-    # end
-
-    # xgridplot = linesegments!(
-    #     tr, xgridpoints; 
-    #     color = tr.xgridcolor, linewidth = tr.xgridwidth, style = tr.xgridstyle, 
-    #     visible = tr.xgridvisible
-    # )
-    # xminorgridplot = linesegments!(
-    #     tr, xminorgridpoints; 
-    #     color = tr.xminorgridcolor, linewidth = tr.xminorgridwidth, style = tr.xminorgridstyle, 
-    #     visible = tr.xminorgridvisible
-    # )
-    # xticklabelplot = text!(
-    #     tr, xticklabelpositions; 
-    #     text = xticklabels, fontsize = tr.tick_fontsize, rotation = tr.xticklabelrotation, 
-    #     color = tr.xticklabelcolor, font = tr.xticklabelfont,
-    #     align = (:left, :center)
-    # )
-
-    xspineplot, xgridplot, xminorgridplot, xticklabelplot = draw_dim_axis!(tr, Val(1))
-    yspineplot, ygridplot, yminorgridplot, yticklabelplot = draw_dim_axis!(tr, Val(2))
-    zspineplot, zgridplot, zminorgridplot, zticklabelplot = draw_dim_axis!(tr, Val(3))
-
-
-    # ytickvals = Observable(Vector{Real}())
-    # ytickpositions = Observable(Vector{Point2f}())
-    # ygridpoints = Observable(Vector{Point2f}())
-
-    # for f1 in fracs
-    #     f2 = 1 - f1
-    #     vec1 = [0, f2, f1]
-    #     vec2 = [f1, f2, 0]
-
-    #     x1 = Point2((R*vec1)[2:3]...)
-    #     x2 = Point2((R*vec2)[2:3]...)
-
-    #     push!(ygridpoints[], x1)
-    #     push!(ygridpoints[], x2)
-
-    #     # labely
-    #     f1 in 0:0.2:1.0 && continue
-    #     push!(ytickvals[], f1)
-    #     push!(ytickpositions[], x1)
-    # end
-
-    # ygridplot = linesegments!(tr, ygridpoints; color = tr.grid_line_color, linewidth = tr.grid_line_width)
-    # yticklabelplot = text!(tr, ytickpositions; text = @lift($(tr.ytickformat)($ytickvals)), fontsize = tr.tick_fontsize, rotation = tr.yticklabelrotation, align = (:left, :center))
-
-    # ztickvals = Observable(Vector{Real}())
-    # ztickpositions = Observable(Vector{Point2f}())
-    # zgridpoints = Observable(Vector{Point2f}())
-
-    # for f1 in fracs
-    #     f2 = 1 - f1
-    #     vec1 = [f2, 0, f1]
-    #     vec2 = [0, f2, f1]
-
-    #     x1 = Point2((R*vec1)[2:3]...)
-    #     x2 = Point2((R*vec2)[2:3]...)
-
-    #     push!(zgridpoints[], x1)
-    #     push!(zgridpoints[], x2)
-
-    #     # labelz
-    #     f1 in 0:0.2:1.0 && continue
-    #     push!(ztickvals[], f1)
-    #     push!(ztickpositions[], x1)
-    # end
-
-    # zgridplot = linesegments!(tr, zgridpoints; color = tr.grid_line_color, linewidth = tr.grid_line_width)
-    # zticklabelplot = text!(tr, ztickpositions; text = @lift($(tr.ztickformat)($ztickvals)), fontsize = tr.tick_fontsize, rotation = tr.zticklabelrotation, align = (:right, :center))
-
-    # overall settings
-    y_adj = tr.label_edge_vertical_adjustment[]
-    y_arrow_adj = tr.label_edge_vertical_arrow_adjustment[]
-    arrow_scale = tr.arrow_scale[]
-    arrow_label_rot_adj = tr.arrow_label_rotation_adjustment[]
-
-    x0, y0 = (R*[0.7, 0.0, 0.3])[2:3] # eyeballed good looking arrow start
-    y1 = y0 + y_arrow_adj / 2
-    x1 = x0 - sqrt(3) * (y1 - y0)
-    bracket!(
-        tr, 
-        Point2f(x1, y1), Point2f(r3[1], r3[2]) * arrow_scale + Point2f(x1, y1);
-        text = tr.zlabel,
-        orientation = :up,
-        style = :arrow,
-        fontsize = tr.arrow_label_fontsize,
-        linestyle = :solid,
-        xautolimits = false,
-        yautolimits = false,
-        inspectable = false,
-    )
-
-    # lambda 2: the "y" axis
-    x0, y0 = (R*[0.0, 0.3, 0.7])[2:3]
-    y1 = y0 + y_arrow_adj / 2
-    x1 = x0 + sqrt(3) * (y1 - y0)
-    bracket!(
-        tr, 
-        Point2f(x1, y1), -Point2f(r3[1] - r2[1], r3[2] - r2[2]) * arrow_scale + Point2f(x1, y1);
-        text = tr.ylabel,
-        orientation = :up,
-        style = :arrow,
-        fontsize = tr.arrow_label_fontsize,
-        linestyle = :solid,
-        xautolimits = false,
-        yautolimits = false,
-        inspectable = false,
-    )
-
-    # lambda 1: the "x" axis
-    x0, y0 = (R*[0.3, 0.7, 0.0])[2:3]
-    y1 = y0 - y_arrow_adj
-    x1 = x0
-    bracket!(
-        tr, 
-        Point2f(x1, y1), -Point2f(r2[1], r2[2]) * arrow_scale + Point2f(x1, y1);
-        text = tr.xlabel,
-        # width = @lift($(tr.label_edge_vertical_arrow_adjustment) + $(tr.tick_fontsize)),
-        orientation = :down,
-        style = :arrow,
-        fontsize = tr.arrow_label_fontsize,
-        linestyle = :solid,
-        xautolimits = false,
-        yautolimits = false,
-        inspectable = false,
-    )
 end
 
 function Makie.plot!(tr::TernaryAxis)
