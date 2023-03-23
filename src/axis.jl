@@ -7,21 +7,21 @@ function draw_triangle_vertex_labels!(tr::TernaryAxis)
     text!(
         tr,
         Point2(r3...) + Point(0, y_adj);
-        text = tr.labelz[],
+        text = tr.labelz_arrow[],
         align = (:center, :center),
         fontsize = tr.label_fontsize[],
     )
     text!(
         tr,
         Point2(r2...) + Point(0, -y_adj);
-        text = tr.labely[],
+        text = tr.labely_arrow[],
         align = (:left, :center),
         fontsize = tr.label_fontsize[],
     )
     text!(
         tr,
         Point2(r1...) + Point2(0, -y_adj);
-        text = tr.labelx[],
+        text = tr.labelx_arrow[],
         align = (:right, :center),
         fontsize = tr.label_fontsize[],
     )
