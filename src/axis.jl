@@ -7,21 +7,21 @@ function draw_triangle_vertex_labels!(tr::TernaryAxis)
     text!(
         tr,
         Point2(r3...) + Point(0, y_adj);
-        text = tr.labelz_arrow[],
+        text = tr.labelz[],
         align = (:center, :center),
         fontsize = tr.label_fontsize[],
-    )
+        )
     text!(
         tr,
         Point2(r2...) + Point(0, -y_adj);
-        text = tr.labely_arrow[],
+        text = tr.labely[],
         align = (:left, :center),
         fontsize = tr.label_fontsize[],
     )
     text!(
         tr,
         Point2(r1...) + Point2(0, -y_adj);
-        text = tr.labelx_arrow[],
+        text = tr.labelx[],
         align = (:right, :center),
         fontsize = tr.label_fontsize[],
     )
@@ -38,10 +38,10 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
     x0, y0 = (R*[0.5, 0.0, 0.5])[2:3] # middle of the edge
     y1 = y0 + y_adj / 2
     x1 = x0 - sqrt(3) * (y1 - y0)
-    text!(
+    isnothing(tr.labelz_arrow[]) || text!(
         tr,
         Point2(x1, y1);
-        text = tr.labelz[],
+        text = tr.labelz_arrow[],
         align = (:center, :center),
         rotation = π / 3 * arrow_label_rot_adj, # sometimes this is not aligned
         fontsize = tr.arrow_label_fontsize[],
@@ -55,10 +55,10 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
     x0, y0 = (R*[0.0, 0.5, 0.5])[2:3]
     y1 = y0 + y_adj / 2
     x1 = x0 + sqrt(3) * (y1 - y0)
-    text!(
+    isnothing(tr.labely_arrow[]) || text!(
         tr,
         Point2(x1, y1);
-        text = tr.labely[],
+        text = tr.labely_arrow[],
         align = (:center, :center),
         rotation = -π / 3 * arrow_label_rot_adj,
         fontsize = tr.arrow_label_fontsize[],
@@ -78,10 +78,10 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
     x0, y0 = (R*[0.5, 0.5, 0.0])[2:3]
     x1 = x0
     y1 = y0 - y_adj
-    text!(
+    isnothing(tr.labelx_arrow[]) || text!(
         tr,
         Point2(x1, y1);
-        text = tr.labelx[],
+        text = tr.labelx_arrow[],
         align = (:center, :center),
         fontsize = tr.arrow_label_fontsize[],
     )
