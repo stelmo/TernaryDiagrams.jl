@@ -9,21 +9,33 @@ function draw_triangle_vertex_labels!(tr::TernaryAxis)
         Point2(r3...) + Point(0, y_adj);
         text = tr.zlabel,
         align = (:center, :center),
-        fontsize = tr.label_fontsize[],
+        fontsize = tr.zlabelsize,
+        color = tr.zlabelcolor,
+        font = tr.zlabelfont,
+        fonts = tr.fonts,
+        rotation = tr.zlabelrotation,
     )
     text!(
         tr,
         Point2(r2...) + Point(0, -y_adj);
         text = tr.ylabel,
         align = (:left, :center),
-        fontsize = tr.label_fontsize[],
+        fontsize = tr.ylabelsize,
+        color = tr.ylabelcolor,
+        font = tr.ylabelfont,
+        fonts = tr.fonts,
+        rotation = tr.ylabelrotation,
     )
     text!(
         tr,
         Point2(r1...) + Point2(0, -y_adj);
         text = tr.xlabel,
         align = (:right, :center),
-        fontsize = tr.label_fontsize[],
+        fontsize = tr.xlabelsize,
+        color = tr.xlabelcolor,
+        font = tr.xlabelfont,
+        fonts = tr.fonts,
+        rotation = tr.xlabelrotation,
     )
 end
 
@@ -168,6 +180,8 @@ function draw_dim_axis!(tr::TernaryAxis, dim::Val{Dim}) where Dim
         style = :arrow,
         fontsize = tr.arrow_label_fontsize,
         linestyle = :solid,
+        color = tr[dimsym(:arrowcolor, dim)],
+        linewidth = tr[dimsym(:arrowwidth, dim)],
         xautolimits = false,
         yautolimits = false,
         inspectable = false,
