@@ -23,9 +23,9 @@ ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71));
 
 ternaryaxis!(
     ax; 
-    labelx = "a1",
-    labely = "a2",
-    labelz = "a3",
+    xlabel = "a1",
+    ylabel = "a2",
+    zlabel = "a3",
     # more options available, check out attributes with ?ternaryaxis (same for other plot functions)
     #= Note 
     Depending on the length of the axis labels, they may seem unaligned. 
