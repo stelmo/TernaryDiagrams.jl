@@ -88,8 +88,8 @@ function triangle_gridline(f1, ::Val{Dim}) where Dim
         vec1 = [f1, f2, 0]
         vec2 = [f1, 0, f2]
     elseif Dim == 2
-        vec1 = [0, f2, f1]
-        vec2 = [f1, f2, 0]
+        vec1 = [0, f1, f2]
+        vec2 = [f2, f1, 0]
     elseif Dim == 3
         vec1 = [f2, 0, f1]
         vec2 = [0, f2, f1]
@@ -140,10 +140,10 @@ function draw_dim_axis!(tr::TernaryAxis, dim::Val{Dim}) where Dim
     end
 
     # plot everything we can (spines, ticks, etc)
-    spineplot = linesegments!(
-        tr, triangle_gridline(0, dim);
-        color = tr[dimsym(:spinecolor, dim)], linewidth = tr[dimsym(:spinewidth, dim)], style = tr[dimsym(:spinestyle, dim)], 
-        visible = tr[dimsym(:spinevisible, dim)]
+    minorgridplot = linesegments!(
+        tr, minorgridpoints; 
+        color = tr[dimsym(:minorgridcolor, dim)], linewidth = tr[dimsym(:minorgridwidth, dim)], style = tr[dimsym(:minorgridstyle, dim)], 
+        visible = tr[dimsym(:minorgridvisible, dim)]
     )
 
     gridplot = linesegments!(
@@ -152,10 +152,10 @@ function draw_dim_axis!(tr::TernaryAxis, dim::Val{Dim}) where Dim
         visible = tr[dimsym(:gridvisible, dim)]
     )
 
-    minorgridplot = linesegments!(
-        tr, minorgridpoints; 
-        color = tr[dimsym(:minorgridcolor, dim)], linewidth = tr[dimsym(:minorgridwidth, dim)], style = tr[dimsym(:minorgridstyle, dim)], 
-        visible = tr[dimsym(:minorgridvisible, dim)]
+    spineplot = linesegments!(
+        tr, triangle_gridline(0, mod1(Dim-1, 3));
+        color = tr[dimsym(:spinecolor, dim)], linewidth = tr[dimsym(:spinewidth, dim)], style = tr[dimsym(:spinestyle, dim)], 
+        visible = tr[dimsym(:spinevisible, dim)]
     )
 
     ticklabelplot = text!(
