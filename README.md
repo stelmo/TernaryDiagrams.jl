@@ -35,8 +35,6 @@ ternaryaxis!(
 )
 
 # the triangle is drawn from (0,0) to (0.5, sqrt(3)/2) to (1,0).
-xlims!(ax, -0.2, 1.2) # to center the triangle and allow space for the labels
-ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax) # to hide the axis decorations
 fig
 ```
@@ -54,8 +52,6 @@ ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71));
 ternaryaxis!(ax);
 ternarylines!(ax, a1, a2, a3; color = :blue)
 
-xlims!(ax, -0.2, 1.2)
-ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax)
 fig
 ```
@@ -69,7 +65,7 @@ fig
 ```julia
 
 fig = Figure();
-ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71)));
+ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71));
 
 ternaryaxis!(ax);
 ternaryscatter!(
@@ -82,8 +78,6 @@ ternaryscatter!(
     markersize = 20,
 )
 
-xlims!(ax, -0.2, 1.2)
-ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax)
 fig
 ```
@@ -96,7 +90,7 @@ fig
 ## Ternary contours
 ```julia
 fig = Figure();
-ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71)));
+ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71));
 
 ternarycontour!(
     ax,
@@ -112,9 +106,6 @@ ternarycontour!(
 )
 
 ternaryaxis!(ax);
-
-xlims!(ax, -0.2, 1.2)
-ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax)
 fig
 ```
@@ -131,11 +122,9 @@ Note: `ternarycontour` uses a different Delaunay triangulation scheme to
 from Makie internally).
 ```julia
 fig = Figure();
-ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71)));
+ax = Axis(fig[1, 1]; aspect = AxisAspect(96/71));
 ternarycontourf!(ax, a1, a2, a3, ws; levels = 10)
 ternaryaxis!(ax);
-xlims!(ax, -0.2, 1.2)
-ylims!(ax, -0.3, 1.1)
 hidedecorations!(ax)
 fig
 ```
