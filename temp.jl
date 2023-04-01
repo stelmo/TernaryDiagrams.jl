@@ -3,10 +3,10 @@ using ColorSchemes
 using TernaryDiagrams
 using JLD2
 
-a1 = load("test/data.jld2", "a1")
-a2 = load("test/data.jld2", "a2")
-a3 = load("test/data.jld2", "a3")
-ws = Float64.(load("test/data.jld2", "mus"))
+a1 = load(joinpath(@__DIR__, "test", "data.jld2"), "a1")
+a2 = load(joinpath(@__DIR__, "test", "data.jld2"), "a2")
+a3 = load(joinpath(@__DIR__, "test", "data.jld2"), "a3")
+ws = Float64.(load(joinpath(@__DIR__, "test", "data.jld2"), "mus"))
 
 fig = Figure();
 ax = Axis(fig[1, 1]);
