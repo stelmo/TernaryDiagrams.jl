@@ -187,6 +187,10 @@ function draw_dim_axis!(tr::TernaryAxis, dim::Val{Dim}) where Dim
         inspectable = false,
     )
 
+    on(Makie.parent_scene(tr).px_area) do _
+        notify(arrowplot[1])
+    end
+
     return (spineplot, gridplot, minorgridplot, ticklabelplot, arrowplot)
 
 
@@ -207,7 +211,7 @@ function Makie.plot!(tr::TernaryAxis)
     draw_triangle_vertex_labels!(tr)
     draw_triangle_axis!(tr)
 
-    tr
+    return tr
 end
 
 Makie.data_limits(::TernaryAxis) = Rect3f((-0.2, -0.3, 0), (1.4, 1.4, 0))
