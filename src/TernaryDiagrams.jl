@@ -67,6 +67,8 @@ Makie.@recipe(TernaryAxis) do scene
         tick_fontsize = 8,
         grid_line_color = :grey,
         grid_line_width = 0.5,
+        hide_vertex_labels = false,
+        hide_triangle_labels = false,
     )
 end
 

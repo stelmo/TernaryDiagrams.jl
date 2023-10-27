@@ -1,7 +1,7 @@
 name = "TernaryDiagrams"
 uuid = "54198458-1476-45ac-9e44-88a4201bfea6"
 authors = ["St. Elmo Wilken <stelmozors@gmail.com> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
