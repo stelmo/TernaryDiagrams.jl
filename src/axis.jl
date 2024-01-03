@@ -9,21 +9,21 @@ function draw_triangle_vertex_labels!(tr::TernaryAxis)
         Point2(r3...) + Point(0, y_adj);
         text = tr.labelz[],
         align = (:center, :center),
-        fontsize = tr.label_fontsize[],
-        )
+        fontsize = tr.label_fontsize[] * tr.hide_vertex_labels[],
+    )
     text!(
         tr,
         Point2(r2...) + Point(0, -y_adj);
         text = tr.labely[],
         align = (:left, :center),
-        fontsize = tr.label_fontsize[],
+        fontsize = tr.label_fontsize[] * tr.hide_vertex_labels[],
     )
     text!(
         tr,
         Point2(r1...) + Point2(0, -y_adj);
         text = tr.labelx[],
         align = (:right, :center),
-        fontsize = tr.label_fontsize[],
+        fontsize = tr.label_fontsize[] * tr.hide_vertex_labels[],
     )
 end
 
@@ -44,7 +44,7 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
         text = tr.labelz_arrow[],
         align = (:center, :center),
         rotation = π / 3 * arrow_label_rot_adj, # sometimes this is not aligned
-        fontsize = tr.arrow_label_fontsize[],
+        fontsize = tr.arrow_label_fontsize[] * tr.hide_triangle_labels[],
     )
     x0, y0 = (R*[0.7, 0.0, 0.3])[2:3] # eyeballed good looking arrow start
     y1 = y0 + y_arrow_adj / 2
@@ -61,7 +61,7 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
         text = tr.labely_arrow[],
         align = (:center, :center),
         rotation = -π / 3 * arrow_label_rot_adj,
-        fontsize = tr.arrow_label_fontsize[],
+        fontsize = tr.arrow_label_fontsize[] * tr.hide_triangle_labels[],
     )
     x0, y0 = (R*[0.0, 0.3, 0.7])[2:3]
     y1 = y0 + y_arrow_adj / 2
@@ -83,7 +83,7 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
         Point2(x1, y1);
         text = tr.labelx_arrow[],
         align = (:center, :center),
-        fontsize = tr.arrow_label_fontsize[],
+        fontsize = tr.arrow_label_fontsize[] * tr.hide_triangle_labels[],
     )
     x0, y0 = (R*[0.3, 0.7, 0.0])[2:3]
     y1 = y0 - y_arrow_adj
