@@ -17,7 +17,7 @@ GeometricalPredicates = "0.4"
 VoronoiDelaunay = "0.4"
 DocStringExtensions = "0.9"
 ColorSchemes = "3"
-Makie = "0.19"
+Makie = "0.2"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

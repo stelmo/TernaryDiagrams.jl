@@ -127,7 +127,7 @@ fig
 ## Ternary filled contours
 Note: `ternarycontour` uses a different Delaunay triangulation scheme to
 `ternarycontourf` (the former is made by me, while the latter essentially calls
-[`tricontourf`](https://docs.makie.org/v0.19.0/examples/plotting_functions/tricontourf/)
+`tricontourf` from Makie.
 from Makie internally).
 ```julia
 fig = Figure();
