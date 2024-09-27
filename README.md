@@ -10,12 +10,6 @@ that can be used to construct a (relatively quick and dirty) [ternary
 plot](https://en.wikipedia.org/wiki/Ternary_plot). 
 
 In all the examples that follow, it is assumed that `a1[i] + a2[i] + a3[i] = 1`.
-If applicable, `w[i]` corresponds to the weight associated with the point
-`(a1[i], a2[i], a3[i])` for each index `i` in the dataset. If you would like to
-load a test dataset, use `test/data.jld2`, which can be opened with
-[JLD2.jl](https://github.com/JuliaIO/JLD2.jl). The file contains `a1`, `a2`,
-`a3` and `mus`, with the latter being weights associated with the data points.
-See the file `temp.jl` for an example of its usage.
 
 ## The ternary axis
 ```julia
@@ -45,7 +39,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/axis.png?maxAge=0" width="80%">
+    <img src="figs/axis.png?maxAge=0" width="60%">
 </div>
 </br>
 
@@ -72,7 +66,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/lines.png?maxAge=0" width="80%">
+    <img src="figs/lines.png?maxAge=0" width="60%">
 </div>
 </br>
 
@@ -108,7 +102,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/scatter.png?maxAge=0" width="80%">
+    <img src="figs/scatter.png?maxAge=0" width="60%">
 </div>
 </br>
 
@@ -147,7 +141,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/contour.png?maxAge=0" width="80%">
+    <img src="figs/contour.png?maxAge=0" width="60%">
 </div>
 </br>
 
@@ -155,7 +149,7 @@ fig
 Note: `ternarycontour` uses a different Delaunay triangulation scheme to
 `ternarycontourf` (the former is made by me, while the latter essentially calls
 `tricontourf` from Makie.
-from Makie internally).
+
 ```julia
 using GLMakie
 using TernaryDiagrams
@@ -176,7 +170,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/contourfill.png?maxAge=0" width="80%">
+    <img src="figs/contourfill.png?maxAge=0" width="60%">
 </div>
 </br>
 
