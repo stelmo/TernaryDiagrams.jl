@@ -45,7 +45,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/axis.svg?maxAge=0" width="80%">
+    <img src="figs/axis.png?maxAge=0" width="80%">
 </div>
 </br>
 
@@ -72,7 +72,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/lines.svg?maxAge=0" width="80%">
+    <img src="figs/lines.png?maxAge=0" width="80%">
 </div>
 </br>
 
@@ -108,7 +108,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/scatter.svg?maxAge=0" width="80%">
+    <img src="figs/scatter.png?maxAge=0" width="80%">
 </div>
 </br>
 
@@ -147,7 +147,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/contour.svg?maxAge=0" width="80%">
+    <img src="figs/contour.png?maxAge=0" width="80%">
 </div>
 </br>
 
@@ -176,7 +176,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/contourfill.svg?maxAge=0" width="80%">
+    <img src="figs/contourfill.png?maxAge=0" width="80%">
 </div>
 </br>
 

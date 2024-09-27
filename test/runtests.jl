@@ -4,4 +4,6 @@ using SafeTestsets
     include("aqua.jl")
 end
 
-#TODO: add existing files to the test suite in a meaningful manner.
+@safetestset "ReferenceTests" begin
+    include("referencetests.jl")
+end
