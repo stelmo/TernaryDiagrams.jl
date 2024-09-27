@@ -90,7 +90,7 @@ ternaryscatter!(
     a1,
     a2,
     a3;
-    color = [get(ColorSchemes.Spectral, w, extrema(mus)) for w in mus],
+    color = [get(Makie.ColorSchemes.Spectral, w, extrema(mus)) for w in mus],
     marker = :circle,
     markersize = 20,
 )
@@ -128,7 +128,7 @@ ternarycontour!(
     levels = 5,
     linewidth = 4,
     color = nothing,
-    colormap = reverse(ColorSchemes.Spectral),
+    colormap = reverse(Makie.ColorSchemes.Spectral),
     pad_data = true,
 )
 
