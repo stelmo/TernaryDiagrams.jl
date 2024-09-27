@@ -1,6 +1,7 @@
 # TernaryDiagrams
 [repostatus-url]: https://www.repostatus.org/#active
 [repostatus-img]: https://www.repostatus.org/badges/latest/active.svg
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 [![repostatus-img]][repostatus-url] [![TernaryDiagrams Downloads](https://shields.io/endpoint?url=https://pkgs.genieframework.com/api/v1/badge/TernaryDiagrams)](https://pkgs.genieframework.com?packages=TernaryDiagrams)
 
@@ -18,6 +19,8 @@ See the file `temp.jl` for an example of its usage.
 
 ## The ternary axis
 ```julia
+using GLMakie
+using TernaryDiagrams
 fig = Figure();
 ax = Axis(fig[1, 1]);
 
@@ -48,10 +51,18 @@ fig
 
 ## Ternary lines
 ```julia
-fig = Figure();
-ax = Axis(fig[1, 1]);
+using GLMakie
+using TernaryDiagrams
+using JLD2
+@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+a1 = a1[1:20]
+a2 = a2[1:20]
+a3 = a3[1:20]
 
-ternaryaxis!(ax);
+fig = Figure()
+ax = Axis(fig[1, 1])
+
+ternaryaxis!(ax)
 ternarylines!(ax, a1, a2, a3; color = :blue)
 
 xlims!(ax, -0.2, 1.2)
@@ -67,17 +78,25 @@ fig
 
 ## Ternary scatter
 ```julia
+using GLMakie
+using TernaryDiagrams
+using JLD2
+@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+a1 = a1[1:20]
+a2 = a2[1:20]
+a3 = a3[1:20]
+mus = mus[1:20]
 
-fig = Figure();
-ax = Axis(fig[1, 1]);
+fig = Figure()
+ax = Axis(fig[1, 1])
 
-ternaryaxis!(ax);
+ternaryaxis!(ax)
 ternaryscatter!(
     ax,
     a1,
     a2,
     a3;
-    color = [get(ColorSchemes.Spectral, w, extrema(ws)) for w in ws],
+    color = [get(ColorSchemes.Spectral, w, extrema(mus)) for w in mus],
     marker = :circle,
     markersize = 20,
 )
@@ -95,6 +114,14 @@ fig
 
 ## Ternary contours
 ```julia
+using GLMakie
+using TernaryDiagrams
+using JLD2
+@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+a1 = a1[1:20]
+a2 = a2[1:20]
+a3 = a3[1:20]
+mus = mus[1:20]
 fig = Figure();
 ax = Axis(fig[1, 1]);
 
@@ -103,7 +130,7 @@ ternarycontour!(
     a1,
     a2,
     a3,
-    ws;
+    mus;
     levels = 5,
     linewidth = 4,
     color = nothing,
@@ -111,7 +138,7 @@ ternarycontour!(
     pad_data = true,
 )
 
-ternaryaxis!(ax);
+ternaryaxis!(ax)
 
 xlims!(ax, -0.2, 1.2)
 ylims!(ax, -0.3, 1.1)
@@ -130,9 +157,17 @@ Note: `ternarycontour` uses a different Delaunay triangulation scheme to
 `tricontourf` from Makie.
 from Makie internally).
 ```julia
+using GLMakie
+using TernaryDiagrams
+using JLD2
+@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+a1 = a1[1:20]
+a2 = a2[1:20]
+a3 = a3[1:20]
+mus = mus[1:20]
 fig = Figure();
 ax = Axis(fig[1, 1]);
-ternarycontourf!(ax, a1, a2, a3, ws; levels = 10)
+ternarycontourf!(ax, a1, a2, a3, mus; levels = 10)
 ternaryaxis!(ax);
 xlims!(ax, -0.2, 1.2)
 ylims!(ax, -0.3, 1.1)
