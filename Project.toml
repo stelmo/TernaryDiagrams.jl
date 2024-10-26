@@ -7,20 +7,30 @@ version = "0.1.2"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 GeometricalPredicates = "fd0ad045-b25c-564e-8f9c-8ef5c5f21267"
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 VoronoiDelaunay = "72f80fcb-8c52-57d9-aff0-40c1a3526986"
 
 [compat]
-julia = "1"
-GeometricalPredicates = "0.4"
-VoronoiDelaunay = "0.4"
-DocStringExtensions = "0.9"
+Aqua = "0.8"
 ColorSchemes = "3"
-Makie = "0.2"
+DocStringExtensions = "0.9"
+GeometricalPredicates = "0.4"
+GLMakie = "0.9, 0.10"
+JLD2 = "0.5"
+Makie = "0.20, 0.21"
+ReferenceTests = "0.10"
+SafeTestsets = "0.1"
+Test = "1"
+VoronoiDelaunay = "0.4"
+julia = "1"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+ReferenceTests = "324d217c-45ce-50fc-942e-d289b448e8cf"
+SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["Aqua", "GLMakie", "JLD2", "ReferenceTests", "SafeTestsets", "Test"]

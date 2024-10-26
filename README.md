@@ -1,6 +1,7 @@
 # TernaryDiagrams
 [repostatus-url]: https://www.repostatus.org/#active
 [repostatus-img]: https://www.repostatus.org/badges/latest/active.svg
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 [![repostatus-img]][repostatus-url] [![TernaryDiagrams Downloads](https://shields.io/endpoint?url=https://pkgs.genieframework.com/api/v1/badge/TernaryDiagrams)](https://pkgs.genieframework.com?packages=TernaryDiagrams)
 
@@ -9,15 +10,11 @@ that can be used to construct a (relatively quick and dirty) [ternary
 plot](https://en.wikipedia.org/wiki/Ternary_plot). 
 
 In all the examples that follow, it is assumed that `a1[i] + a2[i] + a3[i] = 1`.
-If applicable, `w[i]` corresponds to the weight associated with the point
-`(a1[i], a2[i], a3[i])` for each index `i` in the dataset. If you would like to
-load a test dataset, use `test/data.jld2`, which can be opened with
-[JLD2.jl](https://github.com/JuliaIO/JLD2.jl). The file contains `a1`, `a2`,
-`a3` and `mus`, with the latter being weights associated with the data points.
-See the file `temp.jl` for an example of its usage.
 
 ## The ternary axis
 ```julia
+using GLMakie
+using TernaryDiagrams
 fig = Figure();
 ax = Axis(fig[1, 1]);
 
@@ -42,16 +39,24 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/axis.svg?maxAge=0" width="80%">
+    <img src="figs/axis.png?maxAge=0" width="60%">
 </div>
 </br>
 
 ## Ternary lines
 ```julia
-fig = Figure();
-ax = Axis(fig[1, 1]);
+using GLMakie
+using TernaryDiagrams
+using JLD2
+@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+a1 = a1[1:20]
+a2 = a2[1:20]
+a3 = a3[1:20]
 
-ternaryaxis!(ax);
+fig = Figure()
+ax = Axis(fig[1, 1])
+
+ternaryaxis!(ax)
 ternarylines!(ax, a1, a2, a3; color = :blue)
 
 xlims!(ax, -0.2, 1.2)
@@ -61,23 +66,31 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/lines.svg?maxAge=0" width="80%">
+    <img src="figs/lines.png?maxAge=0" width="60%">
 </div>
 </br>
 
 ## Ternary scatter
 ```julia
+using GLMakie
+using TernaryDiagrams
+using JLD2
+@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+a1 = a1[1:20]
+a2 = a2[1:20]
+a3 = a3[1:20]
+mus = mus[1:20]
 
-fig = Figure();
-ax = Axis(fig[1, 1]);
+fig = Figure()
+ax = Axis(fig[1, 1])
 
-ternaryaxis!(ax);
+ternaryaxis!(ax)
 ternaryscatter!(
     ax,
     a1,
     a2,
     a3;
-    color = [get(ColorSchemes.Spectral, w, extrema(ws)) for w in ws],
+    color = [get(Makie.ColorSchemes.Spectral, w, extrema(mus)) for w in mus],
     marker = :circle,
     markersize = 20,
 )
@@ -89,12 +102,20 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/scatter.svg?maxAge=0" width="80%">
+    <img src="figs/scatter.png?maxAge=0" width="60%">
 </div>
 </br>
 
 ## Ternary contours
 ```julia
+using GLMakie
+using TernaryDiagrams
+using JLD2
+@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+a1 = a1[1:20]
+a2 = a2[1:20]
+a3 = a3[1:20]
+mus = mus[1:20]
 fig = Figure();
 ax = Axis(fig[1, 1]);
 
@@ -103,15 +124,15 @@ ternarycontour!(
     a1,
     a2,
     a3,
-    ws;
+    mus;
     levels = 5,
     linewidth = 4,
     color = nothing,
-    colormap = reverse(ColorSchemes.Spectral),
+    colormap = reverse(Makie.ColorSchemes.Spectral),
     pad_data = true,
 )
 
-ternaryaxis!(ax);
+ternaryaxis!(ax)
 
 xlims!(ax, -0.2, 1.2)
 ylims!(ax, -0.3, 1.1)
@@ -120,7 +141,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/contour.svg?maxAge=0" width="80%">
+    <img src="figs/contour.png?maxAge=0" width="60%">
 </div>
 </br>
 
@@ -128,11 +149,19 @@ fig
 Note: `ternarycontour` uses a different Delaunay triangulation scheme to
 `ternarycontourf` (the former is made by me, while the latter essentially calls
 `tricontourf` from Makie.
-from Makie internally).
+
 ```julia
+using GLMakie
+using TernaryDiagrams
+using JLD2
+@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+a1 = a1[1:20]
+a2 = a2[1:20]
+a3 = a3[1:20]
+mus = mus[1:20]
 fig = Figure();
 ax = Axis(fig[1, 1]);
-ternarycontourf!(ax, a1, a2, a3, ws; levels = 10)
+ternarycontourf!(ax, a1, a2, a3, mus; levels = 10)
 ternaryaxis!(ax);
 xlims!(ax, -0.2, 1.2)
 ylims!(ax, -0.3, 1.1)
@@ -141,7 +170,7 @@ fig
 ```
 <br>
 <div align="center">
-    <img src="figs/contourfill.svg?maxAge=0" width="80%">
+    <img src="figs/contourfill.png?maxAge=0" width="60%">
 </div>
 </br>
 

@@ -37,12 +37,11 @@ function generate_padded_data(data_coords, ws)
     pad_weights = Float64[]
 
     for p in pad_coords # TODO use nearest neighbor interpolant instead
-        ds = [norm(p - x) for x in data_coords]
+        ds = [normpointdiff(p, x) for x in data_coords]
         # idxs = sortperm(ds)[1:15] # this can be optimized
         # dtot = sum(ds[idxs])
         # w = sum(ws[idx] * ds[idx] / dtot for idx in idxs)
         # push!(pad_weights, w)
-
         idx = argmin(ds)
         push!(pad_weights, ws[idx])
     end
@@ -80,19 +79,19 @@ function split_edges(edges::Vector{Edge})
         for (i, e_idx) in enumerate(edge_idxs)
             edge = edges[e_idx]
             for (c_idx, curve) in enumerate(curves)
-                if norm(last(curve) - first(edge)) < TOL # from global tolerance
+                if normpointdiff(last(curve), first(edge)) < TOL # from global tolerance
                     curves[c_idx] = [curve; last(edge)]
                     used_edge_idx = i
                     break
-                elseif norm(last(curve) - last(edge)) < TOL
+                elseif normpointdiff(last(curve), last(edge)) < TOL
                     curves[c_idx] = [curve; first(edge)]
                     used_edge_idx = i
                     break
-                elseif norm(first(curve) - last(edge)) < TOL
+                elseif normpointdiff(first(curve), last(edge)) < TOL
                     curves[c_idx] = [first(edge); curve]
                     used_edge_idx = i
                     break
-                elseif norm(first(curve) - first(edge)) < TOL
+                elseif normpointdiff(first(curve), first(edge)) < TOL
                     curves[c_idx] = [last(edge); curve]
                     used_edge_idx = i
                     break
@@ -143,8 +142,8 @@ function contour_triangle(scaled_coords, bins, weights, levels)
         end
 
         frac = (bins[level] - low_v) / (high_v - low_v)
-        d = p_high - p_low
-        return d * frac + p_low
+        d = pointsubtract(p_high, p_low)
+        return pointadd(pointmult(d,  frac), p_low)
     end
 
     level_edges = Dict{Int64,Vector{Edge}}()
@@ -152,15 +151,15 @@ function contour_triangle(scaled_coords, bins, weights, levels)
     for triangle in tess
         for level = 1:levels
             a = gp.geta(triangle)
-            a_idx = argmin(norm(x - a) for x in scaled_coords)
+            a_idx = argmin(normpointdiff(x, a) for x in scaled_coords)
             a_above = above_isovalue(weights[a_idx], level, bins)
 
             b = gp.getb(triangle)
-            b_idx = argmin(norm(x - b) for x in scaled_coords)
+            b_idx = argmin(normpointdiff(x, b) for x in scaled_coords)
             b_above = above_isovalue(weights[b_idx], level, bins)
 
             c = gp.getc(triangle)
-            c_idx = argmin(norm(x - c) for x in scaled_coords)
+            c_idx = argmin(normpointdiff(x, c) for x in scaled_coords)
             c_above = above_isovalue(weights[c_idx], level, bins)
 
             p_ab = nothing
@@ -222,7 +221,7 @@ function rem_repeats(coords, weights)
     for (coord, weight) in zip(coords, weights)
         repeated = false
         for u_coord in u_coords
-            if norm(coord - u_coord) < TOL
+            if normpointdiff(coord, u_coord) < TOL
                 repeated = true
                 break
             end

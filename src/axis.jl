@@ -4,23 +4,26 @@ end
 
 function draw_triangle_vertex_labels!(tr::TernaryAxis)
     y_adj = tr.label_vertex_vertical_adjustment[]
-    text!(
+    xlabelpos = r1 .+ [0, -y_adj]
+    ylabelpos = r2 .+ [0, -y_adj]
+    zlabelpos = r3 .+ [0, y_adj]
+    text!(       
         tr,
-        Point2(r3...) + Point(0, y_adj);
+        zlabelpos...;
         text = tr.labelz[],
         align = (:center, :center),
         fontsize = tr.label_fontsize[] * !tr.hide_vertex_labels[],
     )
     text!(
         tr,
-        Point2(r2...) + Point(0, -y_adj);
+        ylabelpos...;
         text = tr.labely[],
         align = (:left, :center),
         fontsize = tr.label_fontsize[] * !tr.hide_vertex_labels[],
     )
     text!(
         tr,
-        Point2(r1...) + Point2(0, -y_adj);
+        xlabelpos...;
         text = tr.labelx[],
         align = (:right, :center),
         fontsize = tr.label_fontsize[] * !tr.hide_vertex_labels[],
@@ -171,6 +174,5 @@ function Makie.plot!(tr::TernaryAxis)
     draw_triangle_vertex_labels!(tr)
     draw_triangle_axis_labels!(tr)
     draw_grid!(tr)
-
     tr
 end

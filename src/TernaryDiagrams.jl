@@ -1,7 +1,7 @@
 module TernaryDiagrams
 
-using Makie, LinearAlgebra, ColorSchemes, DocStringExtensions
-import GeometricalPredicates, VoronoiDelaunay, Base
+using Makie, ColorSchemes, DocStringExtensions
+using GeometricalPredicates, VoronoiDelaunay
 const vd = VoronoiDelaunay
 const gp = GeometricalPredicates
 
@@ -30,11 +30,11 @@ delaunay_unscale(x, y) = [(x - 1.1) / 0.8, (y - 1.1) / 0.8]
 
 unpack(p::gp.Point2D) = (p._x, p._y)
 
-# extend some functions to work with Point2D from GeometricalPredicates
-Base.:(-)(a::gp.Point2D, b::gp.Point2D) = gp.Point2D(a._x - b._x, a._y - b._y)
-Base.:(+)(a::gp.Point2D, b::gp.Point2D) = gp.Point2D(a._x + b._x, a._y + b._y)
-Base.:(*)(a::gp.Point2D, b::Float64) = gp.Point2D(a._x * b, a._y * b)
-LinearAlgebra.norm(a::gp.Point2D) = sqrt(a._x^2 + a._y^2)
+# add/subtract/multiply and norm for Point2D from GeometricalPredicates
+pointsubtract(a::gp.Point2D, b::gp.Point2D) = gp.Point2D(a._x - b._x, a._y - b._y)
+pointadd(a::gp.Point2D, b::gp.Point2D) = gp.Point2D(a._x + b._x, a._y + b._y)
+pointmult(a::gp.Point2D, b::Float64) = gp.Point2D(a._x * b, a._y * b)
+normpointdiff(p1, p2) = (getx(p1) - getx(p2))^2 + (gety(p1) - gety(p2))^2
 
 include("contour_funcs.jl")
 
