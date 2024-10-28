@@ -1,9 +1,6 @@
 using SafeTestsets
 
-@safetestset "Aqua" begin
-    include("aqua.jl")
-end
-
-@safetestset "ReferenceTests" begin
-    include("referencetests.jl")
+@testset "TernaryDiagrams" begin
+    @safetestset "Aqua" include("aqua.jl")
+    @safetestset "ReferenceTests" include("referencetests.jl")
 end
