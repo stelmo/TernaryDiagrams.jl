@@ -4,7 +4,7 @@ using TernaryDiagrams
 using JLD2
 using ReferenceTests
 
-@load pkgdir(TernaryDiagrams)*"\\test\\data.jld2" a1 a2 a3 mus
+@load joinpath(pkgdir(TernaryDiagrams), "test", "data.jld2") a1 a2 a3 mus
 a1 = a1[1:20]
 a2 = a2[1:20]
 a3 = a3[1:20]
