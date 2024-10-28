@@ -1,4 +1,5 @@
 using SafeTestsets
+using Test
 
 @testset "TernaryDiagrams" begin
     @safetestset "Aqua" include("aqua.jl")
