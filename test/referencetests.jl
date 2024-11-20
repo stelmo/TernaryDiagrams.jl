@@ -10,7 +10,7 @@ a3 = a3[1:20]
 mus = mus[1:20]
 
 function testimage_axis()
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(
@@ -27,7 +27,7 @@ function testimage_axis()
 end
 
 function testimage_lines()  
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(ax)
@@ -40,7 +40,7 @@ function testimage_lines()
 end
 
 function testimage_scatter()
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(ax)
@@ -61,7 +61,7 @@ function testimage_scatter()
 end
 
 function testimage_contour()
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternarycontour!(
@@ -86,7 +86,7 @@ function testimage_contour()
 end
 
 function testimage_contourf()
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
     ternarycontourf!(ax, a1, a2, a3, mus; levels = 10)
     ternaryaxis!(ax)
@@ -97,7 +97,7 @@ function testimage_contourf()
 end
 
 function testimage_temp()    
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternarycontourf!(
