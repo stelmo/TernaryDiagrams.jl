@@ -1,5 +1,4 @@
 using GLMakie
-#using ColorSchemes
 using TernaryDiagrams
 using JLD2
 using ReferenceTests
@@ -11,15 +10,14 @@ a3 = a3[1:20]
 mus = mus[1:20]
 
 function testimage_axis()
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure()
+    ax = Axis(fig[1, 1])
 
     ternaryaxis!(
         ax;
         labelx = "a1",
         labely = "a2",
         labelz = "a3",
-        # more options available, check out attributes with ?ternaryaxis
     )
 
     xlims!(ax, -0.2, 1.2) # to center the triangle
@@ -29,10 +27,10 @@ function testimage_axis()
 end
 
 function testimage_lines()  
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure()
+    ax = Axis(fig[1, 1])
 
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
     ternarylines!(ax, a1, a2, a3; color = :blue)
 
     xlims!(ax, -0.2, 1.2)
@@ -42,10 +40,10 @@ function testimage_lines()
 end
 
 function testimage_scatter()
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure()
+    ax = Axis(fig[1, 1])
 
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
     ternaryscatter!(
         ax,
         a1,
@@ -63,8 +61,8 @@ function testimage_scatter()
 end
 
 function testimage_contour()
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure()
+    ax = Axis(fig[1, 1])
 
     ternarycontour!(
         ax,
@@ -79,7 +77,7 @@ function testimage_contour()
         pad_data = true,
     )
 
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
 
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
@@ -88,10 +86,10 @@ function testimage_contour()
 end
 
 function testimage_contourf()
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure()
+    ax = Axis(fig[1, 1])
     ternarycontourf!(ax, a1, a2, a3, mus; levels = 10)
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
@@ -99,8 +97,8 @@ function testimage_contourf()
 end
 
 function testimage_temp()    
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure()
+    ax = Axis(fig[1, 1])
 
     ternarycontourf!(
         ax,
@@ -135,7 +133,7 @@ function testimage_temp()
         markersize = 10,
     )
 
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
 
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
