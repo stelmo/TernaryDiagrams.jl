@@ -9,8 +9,19 @@ a2 = a2[1:20]
 a3 = a3[1:20]
 mus = mus[1:20]
 
+#Somehow fig seems to get converted in AbstractArray{<:Colorant} of different sizes, depending on 
+#what display is used; the function below is a workaround through file saving/loading. Not 
+#elegant, but it works.
+function save_load_remove(fig)
+    n = "tmp.png"
+    save(n, fig, size = (900, 600), px_per_unit = 2)
+    arr = load(n)
+    rm(n)
+    return arr
+end
+
 function testimage_axis()
-    fig = Figure(size = (900, 600))
+    fig = Figure()
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(
@@ -23,11 +34,13 @@ function testimage_axis()
     xlims!(ax, -0.2, 1.2) # to center the triangle
     ylims!(ax, -0.3, 1.1) # to center the triangle
     hidedecorations!(ax) # to hide the axis decos
-    fig
+ 
+    arr = save_load_remove(fig)
+    return arr
 end
 
 function testimage_lines()  
-    fig = Figure(size = (900, 600))
+    fig = Figure()
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(ax)
@@ -36,11 +49,13 @@ function testimage_lines()
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
+
+    arr = save_load_remove(fig)
+    return arr
 end
 
 function testimage_scatter()
-    fig = Figure(size = (900, 600))
+    fig = Figure()
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(ax)
@@ -57,11 +72,13 @@ function testimage_scatter()
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
+
+    arr = save_load_remove(fig)
+    return arr
 end
 
 function testimage_contour()
-    fig = Figure(size = (900, 600))
+    fig = Figure()
     ax = Axis(fig[1, 1])
 
     ternarycontour!(
@@ -82,22 +99,26 @@ function testimage_contour()
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
+    
+    arr = save_load_remove(fig)
+    return arr
 end
 
 function testimage_contourf()
-    fig = Figure(size = (900, 600))
+    fig = Figure()
     ax = Axis(fig[1, 1])
     ternarycontourf!(ax, a1, a2, a3, mus; levels = 10)
     ternaryaxis!(ax)
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
+
+    arr = save_load_remove(fig)
+    return arr
 end
 
 function testimage_temp()    
-    fig = Figure(size = (900, 600))
+    fig = Figure(size = (900, 600), px_per_unit = 2)
     ax = Axis(fig[1, 1])
 
     ternarycontourf!(
@@ -138,8 +159,9 @@ function testimage_temp()
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
 
+    arr = save_load_remove(fig)
+    return arr
 end
 
 @test_reference "../figs/axis.png" testimage_axis()
