@@ -1,5 +1,5 @@
 function draw_triangle_base!(tr::TernaryAxis)
-    lines!(tr, [Point2(r1...), Point2(r2...), Point2(r3...), Point2(r1...)], color = :black)
+    lines!(tr, [Point2f(r1...), Point2f(r2...), Point2f(r3...), Point2f(r1...)], color = :black)
 end
 
 function draw_triangle_vertex_labels!(tr::TernaryAxis)
@@ -43,7 +43,7 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
     x1 = x0 - sqrt(3) * (y1 - y0)
     isnothing(tr.labelz_arrow[]) || text!(
         tr,
-        Point2(x1, y1);
+        Point2f(x1, y1);
         text = tr.labelz_arrow[],
         align = (:center, :center),
         rotation = π / 3 * arrow_label_rot_adj, # sometimes this is not aligned
@@ -60,7 +60,7 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
     x1 = x0 + sqrt(3) * (y1 - y0)
     isnothing(tr.labely_arrow[]) || text!(
         tr,
-        Point2(x1, y1);
+        Point2f(x1, y1);
         text = tr.labely_arrow[],
         align = (:center, :center),
         rotation = -π / 3 * arrow_label_rot_adj,
@@ -83,7 +83,7 @@ function draw_triangle_axis_labels!(tr::TernaryAxis)
     y1 = y0 - y_adj
     isnothing(tr.labelx_arrow[]) || text!(
         tr,
-        Point2(x1, y1);
+        Point2f(x1, y1);
         text = tr.labelx_arrow[],
         align = (:center, :center),
         fontsize = tr.arrow_label_fontsize[] * !tr.hide_triangle_labels[],
@@ -106,8 +106,8 @@ function draw_grid!(tr::TernaryAxis)
         vec1 = [f1, f2, 0]
         vec2 = [f1, 0, f2]
 
-        x1 = Point2((R*vec1)[2:3]...)
-        x2 = Point2((R*vec2)[2:3]...)
+        x1 = Point2f((R*vec1)[2:3]...)
+        x2 = Point2f((R*vec2)[2:3]...)
 
         lines!(tr, [x1, x2], linewidth = grid_line_width, color = grid_line_color)
 
@@ -128,8 +128,8 @@ function draw_grid!(tr::TernaryAxis)
         vec1 = [0, f2, f1]
         vec2 = [f1, f2, 0]
 
-        x1 = Point2((R*vec1)[2:3]...)
-        x2 = Point2((R*vec2)[2:3]...)
+        x1 = Point2f((R*vec1)[2:3]...)
+        x2 = Point2f((R*vec2)[2:3]...)
 
         lines!(tr, [x1, x2], linewidth = grid_line_width, color = grid_line_color)
 
@@ -150,8 +150,8 @@ function draw_grid!(tr::TernaryAxis)
         vec1 = [f2, 0, f1]
         vec2 = [0, f2, f1]
 
-        x1 = Point2((R*vec1)[2:3]...)
-        x2 = Point2((R*vec2)[2:3]...)
+        x1 = Point2f((R*vec1)[2:3]...)
+        x2 = Point2f((R*vec2)[2:3]...)
 
         lines!(tr, [x1, x2], linewidth = grid_line_width, color = grid_line_color)
 

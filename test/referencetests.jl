@@ -1,5 +1,4 @@
 using GLMakie
-#using ColorSchemes
 using TernaryDiagrams
 using JLD2
 using ReferenceTests
@@ -10,42 +9,55 @@ a2 = a2[1:20]
 a3 = a3[1:20]
 mus = mus[1:20]
 
+#ReferenceTests.jl doesn't deal directly with the output of colorbuffer; this helper function 
+#converts the PermutedDimsArray returned by Makie.colorbuffer into a regular Array that 
+#ReferenceTests.jl can deal with. 
+function colorbuffer_array(fig)
+    arr = colorbuffer(fig, px_per_unit = 2)
+    arr2 = zeros(eltype(arr), size(arr))
+    arr2 .= arr
+    return arr2
+end
+
 function testimage_axis()
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure(size = (900, 600))
+    ax = Axis(fig[1, 1])
 
     ternaryaxis!(
         ax;
         labelx = "a1",
         labely = "a2",
         labelz = "a3",
-        # more options available, check out attributes with ?ternaryaxis
     )
 
     xlims!(ax, -0.2, 1.2) # to center the triangle
     ylims!(ax, -0.3, 1.1) # to center the triangle
     hidedecorations!(ax) # to hide the axis decos
-    fig
+ 
+    arr = colorbuffer_array(fig)
+    return arr
 end
 
 function testimage_lines()  
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure(size = (900, 600))
+    ax = Axis(fig[1, 1])
 
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
     ternarylines!(ax, a1, a2, a3; color = :blue)
 
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
+
+    arr = colorbuffer_array(fig)
+    return arr
 end
 
 function testimage_scatter()
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure(size = (900, 600))
+    ax = Axis(fig[1, 1])
 
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
     ternaryscatter!(
         ax,
         a1,
@@ -59,12 +71,14 @@ function testimage_scatter()
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
+
+    arr = colorbuffer_array(fig)
+    return arr
 end
 
 function testimage_contour()
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure(size = (900, 600))
+    ax = Axis(fig[1, 1])
 
     ternarycontour!(
         ax,
@@ -79,28 +93,32 @@ function testimage_contour()
         pad_data = true,
     )
 
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
 
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
+    
+    arr = colorbuffer_array(fig)
+    return arr
 end
 
 function testimage_contourf()
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure(size = (900, 600))
+    ax = Axis(fig[1, 1])
     ternarycontourf!(ax, a1, a2, a3, mus; levels = 10)
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
+
+    arr = colorbuffer_array(fig)
+    return arr
 end
 
 function testimage_temp()    
-    fig = Figure();
-    ax = Axis(fig[1, 1]);
+    fig = Figure(size = (900, 600))
+    ax = Axis(fig[1, 1])
 
     ternarycontourf!(
         ax,
@@ -135,13 +153,14 @@ function testimage_temp()
         markersize = 10,
     )
 
-    ternaryaxis!(ax);
+    ternaryaxis!(ax)
 
     xlims!(ax, -0.2, 1.2)
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
-    fig
 
+    arr = colorbuffer_array(fig)
+    return arr
 end
 
 @test_reference "../figs/axis.png" testimage_axis()
