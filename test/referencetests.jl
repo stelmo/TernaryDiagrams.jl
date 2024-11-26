@@ -9,19 +9,18 @@ a2 = a2[1:20]
 a3 = a3[1:20]
 mus = mus[1:20]
 
-#Somehow fig seems to get converted in AbstractArray{<:Colorant} of different sizes, depending on 
-#what display is used; the function below is a workaround through file saving/loading. Not 
-#elegant, but it works.
-function save_load_remove(fig)
-    n = "tmp.png"
-    save(n, fig, size = (900, 600), px_per_unit = 2)
-    arr = load(n)
-    rm(n)
-    return arr
+#ReferenceTests.jl doesn't deal directly with the output of colorbuffer; this helper function 
+#converts the PermutedDimsArray returned by Makie.colorbuffer into a regular Array that 
+#ReferenceTests.jl can deal with. 
+function colorbuffer_array(fig)
+    arr = colorbuffer(fig, px_per_unit = 2)
+    arr2 = zeros(eltype(arr), size(arr))
+    arr2 .= arr
+    return arr2
 end
 
 function testimage_axis()
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(
@@ -35,12 +34,12 @@ function testimage_axis()
     ylims!(ax, -0.3, 1.1) # to center the triangle
     hidedecorations!(ax) # to hide the axis decos
  
-    arr = save_load_remove(fig)
+    arr = colorbuffer_array(fig)
     return arr
 end
 
 function testimage_lines()  
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(ax)
@@ -50,12 +49,12 @@ function testimage_lines()
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
 
-    arr = save_load_remove(fig)
+    arr = colorbuffer_array(fig)
     return arr
 end
 
 function testimage_scatter()
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternaryaxis!(ax)
@@ -73,12 +72,12 @@ function testimage_scatter()
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
 
-    arr = save_load_remove(fig)
+    arr = colorbuffer_array(fig)
     return arr
 end
 
 function testimage_contour()
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternarycontour!(
@@ -100,12 +99,12 @@ function testimage_contour()
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
     
-    arr = save_load_remove(fig)
+    arr = colorbuffer_array(fig)
     return arr
 end
 
 function testimage_contourf()
-    fig = Figure()
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
     ternarycontourf!(ax, a1, a2, a3, mus; levels = 10)
     ternaryaxis!(ax)
@@ -113,12 +112,12 @@ function testimage_contourf()
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
 
-    arr = save_load_remove(fig)
+    arr = colorbuffer_array(fig)
     return arr
 end
 
 function testimage_temp()    
-    fig = Figure(size = (900, 600), px_per_unit = 2)
+    fig = Figure(size = (900, 600))
     ax = Axis(fig[1, 1])
 
     ternarycontourf!(
@@ -160,7 +159,7 @@ function testimage_temp()
     ylims!(ax, -0.3, 1.1)
     hidedecorations!(ax)
 
-    arr = save_load_remove(fig)
+    arr = colorbuffer_array(fig)
     return arr
 end
 
