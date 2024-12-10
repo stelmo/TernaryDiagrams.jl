@@ -1,9 +1,8 @@
 # TernaryDiagrams
 [repostatus-url]: https://www.repostatus.org/#active
 [repostatus-img]: https://www.repostatus.org/badges/latest/active.svg
-[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-[![repostatus-img]][repostatus-url]
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)[![repostatus-img]][repostatus-url]
 
 This package exports a few [Makie](https://github.com/MakieOrg/Makie.jl) recipes
 that can be used to construct a (relatively quick and dirty) [ternary
